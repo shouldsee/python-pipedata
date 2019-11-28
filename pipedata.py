@@ -1,14 +1,19 @@
-# from delay_and_cache import delay_and_cache as _dac
-# from delay_and_cache import cacheThisFrame as _ctf
-# from delay_and_cache import CachedProxy
-# from delay_and_cache import frame__default
-
 import inspect
 import functools
 from collections import OrderedDict as _dict
 from filelock import FileLock
 import json
+import dill
+import os
+from decorator import decorator
+
 _DEBUG = 1
+
+def file_not_empty(fpath):  
+    '''
+    Source: https://stackoverflow.com/a/15924160/8083313
+    '''
+    return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
 
 def frame__default(frame=None):
     '''
@@ -67,9 +72,6 @@ class BaseFile(object):
 def st_time_size(st):
     return (st.st_mtime, st.st_size)
 
-from pymisca.shell import file__notEmpty as file_not_empty
-# import dill as json
-import dill
 def index_file_read(fname,):
     # with FileLock( fname +'.lock') as lock:
     if file_not_empty(fname):
@@ -169,9 +171,6 @@ class InputTrackedFile(TrackedFile):
     #     index_file_update( self.parent.path, self.path)
     #     return 1
 
-import os        
-
-from decorator import decorator
 
 def func__addSelf(f):
     def g(*a,**kw):
