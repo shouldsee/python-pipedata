@@ -426,7 +426,9 @@ class RawNode(object):
 
     @cached_property
     def _run_result(self,*a,**kw):
-        
+        # return self._run()
+
+    # def _run(self,*a,**kw):
         print("RUNNING:%s"%self)
         output = self.func(self,*a,**kw)
 
