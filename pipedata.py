@@ -132,18 +132,23 @@ class IndexedDiffFileError(Exception):
     '''
     pass
 
+
 class TrackedFile(BaseFile):    
+
     # def index
-    HOOKS_ENABLED = [
+    HOOKS_ENABLED_LIST = [
         "indexed_missing_file",
+        "indexed_diff_file",
     ]
 
+
     def _hook_indexed_missing_file(self):
-        if "indexed_missing_file" in self.HOOKS_ENABLED:
+        if "indexed_missing_file" in self.HOOKS_ENABLED_LIST:
             ### when file is indexed but absent
             raise IndexedMissingFileError(os.getcwd()+'|'+str(self)+str(self.parent))
     def _hook_indexed_diff_file(self):
-        raise IndexedDiffFileError(self)
+        if "indexed_diff_file" in self.HOOKS_ENABLED_LIST:
+            raise IndexedDiffFileError(self)
 
     def _changed(self, ):
         '''
@@ -188,13 +193,6 @@ class TrackedFile(BaseFile):
     def index_update(self,):
         return index_file_update( self.parent.path, self.path)
 
-
-    def changed_if_index_absent(self):
-        "Assuming initialisation"
-        # self.index_update()
-        # assert 0, (self.path, self.parent.path)
-        return 1
-
     @cached_property
     def changed(self):
         val,states  = self._changed()
@@ -218,32 +216,75 @@ def frame_init(frame=None):
     '''
     frame = frame__default(frame)
     print ("[FRAME_INIT] _symbolicInputNode, _symbolicOutputNode")
-    symout = frame.f_locals['_symbolicOutputNode'] = SymbolicOutputNode(
-        lambda self:[x() for x in self.input_kw.values()]
-        ,{},{},0,frame,1,'_symbolicOutputNode')
-    symin  = frame.f_locals['_symbolicInputNode'] = RawNode(lambda self:None,{},{},0,frame,1,'_symbolicInputNode')
+    frame.f_locals['_symbolicRootNode'] = rootNode = SymbolicRootNode(
+        lambda self:None,
+        {},{},0,frame,1,'_symbolicRootNode', None)
+    frame.f_locals['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
+        lambda self:[x() for x in self.input_kw.values()],
+        {},{},0,frame,1,'_symbolicOutputNode',None)
+    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(
+        lambda self:None,
+        {},{},0,frame,1,'_symbolicInputNode',None)
+
     indexFile = frame.f_locals['_indexFile'] = index_get_default(frame).path
     return symin,symout,indexFile
+
+# _counter = -1
+class OutputTrackedFile(TrackedFile):
+    pass
+#     counter = -1
+#     def get_node_name(self, name):
+#         fmt = "OutputTrackedFile_%s"
+#         if name is None:
+#             self.__class__.counter += 1
+#             return fmt % ("%04d"% self.__class__.counter)
+#         else:
+#             return fmt % name
+
+#     def __init__(self, path, parent=None,frame=None, name = None):
+#         frame=frame__default(frame)
+#         name = self.get_node_name(name)
+#         frame.f_locals['_symbolicRootNode'].input_kw[name] = self
+#         super(OutputTrackedFile,self).__init__(path, frame=frame)
 
 class InputTrackedFile(TrackedFile):
     '''
     '''
-    def __init__(self, path, parent=None,frame=None, nodeClass = None , force = 0, skip=1):
+    # counter = _counter
+    counter = -1
+    def get_node_name(self, name):
+        fmt = "InputFileNode_%s"
+        if name is None:
+            self.__class__.counter += 1
+            return fmt % ("%04d"% self.__class__.counter)
+        else:
+            return fmt % name
+
+    def __init__(self, path, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
         if nodeClass is None:
             nodeClass = AutoNode
         frame = frame__default(frame)
 
+        print (self.__class__.counter+1,path,)
+        # import traceback
+        # traceback.print_stack()
+        # print self.get_node_name(name)
         self.node = nodeClass( 
             lambda self, _symbolicInputNode:None,
             input_kw = {}, output_kw={'FILE':self}, force=force,
             frame = frame, skip=skip,
-            name="InputFileNode",
+            name=self.get_node_name(name),
+            tag = path,
              # % path.replace(),
 
             )
-        # print (node, node.input_kw)
         ### create
         super(InputTrackedFile, self).__init__(path,frame=frame)
+
+    @property
+    def changed_upstream(self):
+        return self.node.changed_upstream
+
     def _hook_indexed_diff_file(self):
         print("INPUT_FILE_CHANGED:%s"%self)
         # raise IndexedDiffFileError(self)        
@@ -284,6 +325,7 @@ class RawNode(object):
     _DEBUG = _DEBUG
     returned = returned
     AUTO_UPDATE_OUTPUT = 0
+    OLD = 0
     '''
     Decorate a function by
         filling the positional arguments
@@ -312,10 +354,14 @@ class RawNode(object):
             return 1
         if self._changed_output():
             print( "CHANGED_OUTPUT:%s"%self)
+            # print( "CHANGED_OUTPUT:%s\n%s"%(self,))
+            print (self,self._changed_output())
             return 1
-        if self.changed_upstream:
-            print("CHANGED_UPSTREAM:%s"%self)
-            return 1
+
+        if self.OLD:
+            if self.changed_upstream:
+                print("CHANGED_UPSTREAM:%s"%self)
+                return 1
     
         print("[CHANGED_SAME]:%s"%self)
         return 0
@@ -323,7 +369,15 @@ class RawNode(object):
 
     @cached_property
     def changed_upstream( self,):
-        return [x for x in self.input_kw.values() or () if x.changed]
+        if self.OLD:
+            return [x for x in self.input_kw.values() if x.changed ]
+        else:
+            # it = self.input_kw.values()
+            # for x in it:
+            #     print self, x, x.changed_upstream,x.changed
+            # print (self,zip([x.changed for x in it],it)
+            return [x for x in self.input_kw.values() if x.changed_upstream or x.changed]
+
     # def _changed_upstream(self):
     #     return self._changed_upstream_cache
 
@@ -347,7 +401,8 @@ class RawNode(object):
             return 0
         assert 0
     def __repr__(self):
-        return '<Node with func:%s>' % self.f.__name__
+        return '<Node with func:%s%s>' % (self.f.__name__, 
+                ':tag:%s'% self.tag if self.tag else '')
     def __getitem__(self,key):
         return self.output_kw[key]
 
@@ -382,35 +437,36 @@ class RawNode(object):
         return self.f.__name__
     
     @classmethod
-    def from_func(cls, output_kw, input_kw=None,force=0,frame=None,skip=1, name =None):
+    def from_func(cls, output_kw, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
         def _dec(func):
             _frame = frame__default(frame)
             # None
 
             ### add ouput_kw
             # assert 'returned' not in okw, (okw.keys(), func)
-            self = cls(func, input_kw, output_kw, force, _frame, skip, name)
+            self = cls(func, input_kw, output_kw, force, _frame, skip, name, tag)
             self._attach_func(func, _frame, skip)
             return self        
 
         
         return _dec        
     
-    def __init__(self, func, input_kw, output_kw, force, frame, skip, name):
+    def __init__(self, func, input_kw, output_kw, force, frame, skip, name, tag):
         if name is not None:
             func.__name__ = name
         self.f = func
+        self.tag = tag
         self.input_kw = input_kw  or _dict()
         self.output_kw = output_kw
         self.force = force
         self._frame = frame__default(frame)
         self._attach_func(func, frame, skip)
-        self._attach_to_symout(frame)
+        self._attach_to_root(frame)
         del self._frame
         return  
-    def _attach_to_symout(self,frame=None):
+    def _attach_to_root(self,frame=None):
         frame = frame__default(frame)
-        frame.f_locals['_symbolicOutputNode'].input_kw[self.f.__name__] = self
+        frame.f_locals['_symbolicRootNode'].input_kw[ self.f.__name__ ] = self
 
         pass
 
@@ -426,7 +482,7 @@ class RawNode(object):
 
     @cached_property
     def _run_result(self,*a,**kw):
-        
+
         print("RUNNING:%s"%self)
         output = self.func(self,*a,**kw)
 
@@ -465,13 +521,25 @@ class AutoNode(RawNode):
         else:
             return self.output_kw ### 
 
-# def SymbolicOutputNodeFunc(self): retrun [x() for x in self.input_kw.values()]
-class SymbolicOutputNode(AutoNode):
-    def _attach_to_symout(self,frame=None):
+class SymbolicRootNode(AutoNode):
+    
+    def _attach_to_root(self,frame=None):
         '''
         Do not attach outputNode  to itself
         '''
         pass
+
+# def SymbolicOutputNodeFunc(self): retrun [x() for x in self.input_kw.values()]
+class SymbolicOutputNode(AutoNode):
+    @property
+    def changed(self):
+        return len(self.changed_upstream)
+    
+    # def _attach_to_symout(self,frame=None):
+    #     '''
+    #     Do not attach outputNode  to itself
+    #     '''
+    #     pass
 
 
 # class SymbolicInputNode(RawNode):

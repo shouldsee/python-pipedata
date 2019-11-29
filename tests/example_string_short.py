@@ -1,5 +1,7 @@
+import pipedata; 
 from pipedata import AutoNode as Node
-from pipedata import TrackedFile, InputTrackedFile,frame_init
+from pipedata import RawNode
+from pipedata import TrackedFile, InputTrackedFile, OutputTrackedFile, frame_init
 import os
 
 import time
