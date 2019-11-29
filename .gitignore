@@ -1,2 +1,3 @@
 *.pyc
 .ipynb_check*
+test_build/*
