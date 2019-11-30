@@ -8,8 +8,9 @@ import time
 
 symin, symout, index= frame_init()
 print "[indexFile]",_indexFile
-numberFile = InputTrackedFile('tests-number.txt')
-letterFile = InputTrackedFile('tests-letter.txt')
+numberFile = InputTrackedFile('tests-number.txt',name='numberFile')
+letterFile = InputTrackedFile('tests-letter.txt',name='letterFile')
+print _symbolicRootNode.input_kw
 # dummyFile = InputTrackedFile('test-dummy.txt')
 
 # _output_kw = Node.from_func
@@ -21,8 +22,8 @@ def out5(  self, numberFile, letterFile ):
     '''
     some doc
     '''
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
+    number = open( numberFile().path, 'r').read().strip()
+    letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
         f.write( 5 * (number+letter)+'\n')
     return
@@ -38,8 +39,8 @@ if 1:
         '''
         '''
         '''
-        number = numberFile().open('r').read().strip()
-        letter = letterFile().open('r').read().strip()
+        number = open( numberFile().path, 'r').read().strip()
+        letter = open( letterFile().path, 'r').read().strip()
         with self.output_kw['OUT'].open("w") as f:
             f.write( 10 * (number+letter)+'\n')
         return
@@ -66,8 +67,8 @@ def out15(  self, numberFile, letterFile ):
     '''
     some doc
     '''
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
+    number = open( numberFile().path, 'r').read().strip()
+    letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
         f.write( 15 * (number+letter)+'\n')
     return

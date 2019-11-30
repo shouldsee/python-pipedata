@@ -135,21 +135,22 @@ rm tests-out5.txt
 
             def getPr():
                 pr =  PipeRunner('pipe','pipe.py')
-                pr.pipe.RawNode._hook_indexed_diff_file = lambda: _raise(index_diff_error())
+                pr.pipe.RawNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
                 return pr
 
             with open("pipe.py",'a+') as f:
                 
                 f.write(r'''
-del out10
+
+
 ### changed 10 to 25
 @Node.from_func({
     "OUT":TrackedFile("tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def out10(  self, numberFile, letterFile ):
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
+    number = open( numberFile().path, 'r').read().strip()
+    letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
         f.write( 25 * (number+letter)+'\n')
     return
@@ -172,8 +173,8 @@ dummyFile = InputTrackedFile('test-dummy.txt')
 })
 def out10(  s, numberFile, letterFile,  dummyFile ):
 
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
+    number = open( numberFile().path, 'r').read().strip()
+    letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
         f.write( 10 * (number+letter)+'\n')
     return
@@ -187,9 +188,7 @@ def out10(  s, numberFile, letterFile,  dummyFile ):
             pass
         def getPr():
             pr =  PipeRunner('pipe','pipe.py')
-            def _func(self):
-                raise myError()
-            pr.pipe.RawNode._hook_indexed_diff_file = _func    
+            pr.pipe.RawNode._hook_indexed_diff_file = lambda self:_raise(myError())
             return pr        
         
         with path.Path(self.test_1()).makedirs_p() as d:
@@ -204,8 +203,8 @@ def out10(  self, numberFile, letterFile ):
     "some random comments"
     12334545
     
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
+    number = open( numberFile().path, 'r').read().strip()
+    letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
         f.write( 10 * (number+letter)+'\n')
     return

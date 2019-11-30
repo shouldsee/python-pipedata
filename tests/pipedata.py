@@ -281,18 +281,17 @@ class InputTrackedFile(TrackedFile):
     # counter = _counter
     counter = -1
     def get_node_name(self, name):
-        fmt = "InputFileNode_%s"
         if name is None:
+            fmt = "InputFileNode_%s"
             self.__class__.counter += 1
             return fmt % ("%04d"% self.__class__.counter)
         else:
-            return fmt % name
+            return name
 
     def __init__(self, path, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
         if nodeClass is None:
             nodeClass = AutoNode
         frame = frame__default(frame)
-
         print (self.__class__.counter+1,path,)
         # import traceback
         # traceback.print_stack()
@@ -301,11 +300,12 @@ class InputTrackedFile(TrackedFile):
             lambda self, _symbolicInputNode:None,
             input_kw = _dict(), output_kw={'FILE':self}, force=force,
             frame = frame, skip=skip,
-            name=self.get_node_name(name),
+            name = self.get_node_name(name),
             tag = path,
              # % path.replace(),
-
             )
+        self.node.path = path
+
         ### create
         super(InputTrackedFile, self).__init__(path,frame=frame)
 
@@ -329,13 +329,16 @@ def func__addSelf(f):
         return f(f,*a,**kw)
     return functools.wraps(f)(g)
 
-def func__fill_defaults(skip=0,frame=None):
+def func__fill_defaults(skip=0,frame=None, d=None):
     '''
     Fill positonal argument using values from frame
     '''
 
-    def _dec(f):
-        d = frame__default(frame).f_locals
+    def _dec(f,d=d):
+        if d is None:
+            d = frame__default(frame).f_locals
+        else:
+            assert frame is None
         (args, varargs, keywords, defaults) = inspect.getargspec(f)
         defaults = defaults or () ## this is for kwargs
         # print args,defaults
@@ -356,12 +359,6 @@ class ChangedNodeError(Exception):
     pass
 returned =  _INIT_VALUE()
 class RawNode(object):
-    _DEBUG = _DEBUG
-    returned = returned
-    AUTO_UPDATE_OUTPUT = 0
-    VERBOSE = 1
-    OLD = 0
-    force_index_update = 0 
     '''
     Decorate a function by
         filling the positional arguments
@@ -372,7 +369,44 @@ class RawNode(object):
         
     See help(self.func) for original function docstring
 
-    '''    
+    '''        
+    _DEBUG = _DEBUG
+    returned = returned
+    AUTO_UPDATE_OUTPUT = 0
+    VERBOSE = 1
+    OLD = 0
+    force_index_update = 0 
+    _root = None
+
+
+    def __repr__(self):
+        return '<Node with func:%s%s>' % (self.f.__name__, 
+                ':tag:%s'% self.tag if self.tag else '')
+    def __getitem__(self,key):
+        return self.output_kw[key]
+
+    def __call__(self,*a,**kw):
+        return self.called_value
+    
+    def __init__(self, func, input_kw, output_kw, force, frame, skip, name, tag):
+        if name is not None:
+            func.__name__ = name
+        self.func_orig = func
+        # self.func_orig_source = _get_func_source(func)
+        self.f = func
+        self.tag = tag
+        # self.input_kw = input_kw  or _dict()
+        self.output_kw = output_kw
+        self.force = force
+        # self._frame = 
+        frame = frame__default(frame)
+        self.indexFile = frame.f_locals['_indexFile']
+        self._attach_to_root(frame)
+        # self._attach_func(func, frame, skip)
+        # del self._frame
+        return     
+    def func(self,*a,**kw):
+        raise Exception("Not initialised")
 
     @cached_property
     def changed(self):
@@ -473,26 +507,32 @@ class RawNode(object):
             v2 = self.as_data()['data']
             assert len(v1) == len(v2),(v1.keys(),v2.keys())
 
-            print (self,self.func_orig.func_code)
-            # print self,v1==v2
-            if self.name =='out10':
-                print (self,self.func_orig.func_code)
-                if 0:
-                    if 'line 32' in repr(self.func_orig.func_code):
-                        import pdb,traceback
-                        print(traceback.format_exc())
-                        import traceback
-                        traceback.print_stack()
-                        traceback.print_exc()
-                        pdb.set_trace()
+            _dbg = 0            
+            for v in (v1,v2):
+                src =  '\n'.join(v.pop('func_sourcelines'))
+                v['func_ast_tree'] = _tree = ast_proj(src) ###  exclude from comparision
+                # print '\n'.join()
+                if _dbg:
+                    print src
+                    print _tree
 
+            if _dbg:
+                if self.name =='out10':
+                    print (self,self.func_orig.func_code,v1==v2)
+            #     if 'line 32' in repr(self.func_orig.func_code):
+                    import pdb,traceback
+                    print(traceback.format_exc())
+                    import traceback
+                    traceback.print_stack()
+                    traceback.print_exc()
+                    pdb.set_trace()
                 # print '\n'.join(v1['func_sourcelines'])
                 # print '\n'.join(v2['func_sourcelines'])
                 # print vars(self)
                 # print globals()
+            # sys.stdout.write("%s\n"%[(k,oldv==newv),oldv,newv])
 
-            for v in (v1,v2):
-                v['func_ast_tree'] = ast_proj( '\n'.join(v.pop('func_sourcelines'))) ###  exclude from comparision
+
             if  v1 != v2:
                 diff = _dict()
                 for (k, oldv),(k1, newv) in zip(v1.items(),v2.items()):
@@ -503,7 +543,7 @@ class RawNode(object):
                         diff[k] = (oldv, newv)
 
                 # print diff.keys()
-                if diff.keys() == ['input_kw_keys']:
+                if diff.keys() == [ 'input_kw_keys' ]:
                     oldv, newv =  diff['input_kw_keys']
                     if set(newv).issubset(oldv):
                         return ( self._hook_code_input_kw_smaller(), states)
@@ -518,40 +558,44 @@ class RawNode(object):
         return val,states
         assert 0
 
-    def __repr__(self):
-        return '<Node with func:%s%s>' % (self.f.__name__, 
-                ':tag:%s'% self.tag if self.tag else '')
-    def __getitem__(self,key):
-        return self.output_kw[key]
 
 
     # def input_kw(self):
     #     return  
-    def _attach_func(self, func, frame, skip):
-        '''
-        Decorate and attach the function 
-        '''
+
+    # @staticmethod
+    def _decorate_change_output(self,f):
         @decorator
-        def change_output( f, *a,**kw):
+        def _dec(f, *a,**kw):
             '''
+            Decorate a function 
             return output_kw instead of original value
             `return None` <==> `self.output_kw["return_value"] = None`
             '''
             # okw['returned'] = f( *a, **kw)
             self.returned = f( *a, **kw)
             # return okw            
-            return self            
-        
+            return self     
+        return _dec(f)       
+
+    def _attach_func(self, func, frame, skip):
+        assert 0
+
+    @cached_property
+    def input_kw(self):
+        # return 
+        skip = 1
         ### fill default and add decorate to return output_kw
-        func = func__fill_defaults( skip, frame__default(frame))(func)
-        func = (change_output(func))
+        func = self.func_orig
+        func = func__fill_defaults( skip,  None, self._root.input_kw )(func)
+        func = self._decorate_change_output(func)
         self.func = func
         
         ### add input_kw
         # self.input_kw_keys = args[skip:]
         (args, varargs, keywords, defaults) = inspect.getargspec(func)
-        self.input_kw.update(zip(args[skip:], defaults))
-        return 
+        input_kw = _dict(zip(args[skip:], defaults))
+        return input_kw
 
     @classmethod
     def from_func(cls, output_kw, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
@@ -562,7 +606,7 @@ class RawNode(object):
             ### add ouput_kw
             # assert 'returned' not in okw, (okw.keys(), func)
             self = cls(func, input_kw, output_kw, force, _frame, skip, name, tag)
-            self._attach_func(func, _frame, skip)
+            # self._attach_func(func, _frame, skip)
             return self        
 
         
@@ -571,29 +615,13 @@ class RawNode(object):
     @property
     def name(self):
         return self.f.__name__
-    
-    def __init__(self, func, input_kw, output_kw, force, frame, skip, name, tag):
-        if name is not None:
-            func.__name__ = name
-        self.func_orig = func
-        # self.func_orig_source = _get_func_source(func)
-        self.f = func
-        self.tag = tag
-        self.input_kw = input_kw  or _dict()
-        self.output_kw = output_kw
-        self.force = force
-        # self._frame = 
-        frame = frame__default(frame)
-        self.indexFile = frame.f_locals['_indexFile']
-        self._attach_func(func, frame, skip)
-        self._attach_to_root(frame)
-        # del self._frame
-        return 
+
+
 
     def _attach_to_root(self,frame=None):
         frame = frame__default(frame)
         self._root = _root = frame.f_locals['_symbolicRootNode']
-        self._root.input_kw[ self.f.__name__ ] = self
+        self._root.input_kw[ self.name ] = self
 
         pass
     def _get_func_code(self, func):
@@ -628,9 +656,6 @@ class RawNode(object):
         return result 
 
         # return self._run_result
-
-    def __call__(self,*a,**kw):
-        return self.called_value
 
     # def index_update_output_kw(self):
     #     [x.index_update() for x in self.output_kw.values()]
@@ -708,18 +733,25 @@ class AutoNode(RawNode):
     #         return self.output_kw ### 
 
 class SymbolicRootNode(AutoNode):
-    
+
     def _attach_to_root(self,frame=None):
         '''
         Do not attach outputNode  to itself
         '''
+        self._root = self
         pass
+
+    @cached_property
+    def input_kw(self):
+        return _dict()
 
 # def SymbolicOutputNodeFunc(self): retrun [x() for x in self.input_kw.values()]
 class SymbolicOutputNode(AutoNode):
     @property
     def changed(self):
         return len(self.changed_upstream)
+        # return self._input_kw
+    
     
     # def _attach_to_symout(self,frame=None):
     #     '''

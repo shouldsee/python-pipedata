@@ -18,6 +18,7 @@ def pipe_run(self):
     # nodes = [self._symbolicOutputNode.input_kw]
     # self._symbolicOutputNode()
     [x() for x in self._symbolicRootNode.input_kw.values()]
+    # assert 0,self._symbolicRootNode.input_kw
     # print os.path.realpath( self._indexFile.path )
     # for x in  self._symbolicOutputNode.input_kw
     # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())

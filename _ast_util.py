@@ -15,8 +15,13 @@ class RemoveConst(NodeTransformer):
     Remove the constants expression in ast tree
     '''
     def visit_Expr(self,x):
+        # print(x)
         if isinstance(x.value, (ast.Num, ast.Str,  ast.Ellipsis)):
-            del x
+            # print x.value
+            return
+        else:
+            return x
+        # return ast.AST()
 #     def visit(self,x):
 # #         return
 # #         if x.lineno:
