@@ -1,19 +1,22 @@
-import inspect
 import functools
 from collections import OrderedDict as _dict
-from filelock import FileLock
 import json
-import dill
 import os,sys
+
 from decorator import decorator
 import types
-_DEBUG = 1
-
 
 ### getsource
 import inspect
 import linecache 
-from _inspect_patch import inspect
+
+## for indexing
+import dill
+from filelock import FileLock
+
+_DEBUG = 1
+
+# from _inspect_patch import inspect
 
 from _ast_util import ast_proj
 def file_not_empty(fpath):  
@@ -439,14 +442,12 @@ class RawNode(object):
 
     @cached_property
     def changed_upstream( self,):
-        if self.OLD:
-            return [x for x in self.input_kw.values() if x.changed ]
-        else:
-            # it = self.input_kw.values()
-            # for x in it:
-            #     print self, x, x.changed_upstream,x.changed
-            # print (self,zip([x.changed for x in it],it)
-            return [x for x in self.input_kw.values() if x.changed_upstream or x.changed]
+        self.input_kw
+        # it = self.input_kw.values()
+        # for x in it:
+        #     print self, x, x.changed_upstream,x.changed
+        # print (self,zip([x.changed for x in it],it)
+        return [x for x in self.input_kw.values() if x.changed_upstream or x.changed]
 
     # def _changed_upstream(self):
     #     return self._changed_upstream_cache
