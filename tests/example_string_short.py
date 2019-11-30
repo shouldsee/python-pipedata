@@ -10,6 +10,7 @@ symin, symout, index= frame_init()
 print "[indexFile]",_indexFile
 numberFile = InputTrackedFile('tests-number.txt')
 letterFile = InputTrackedFile('tests-letter.txt')
+# dummyFile = InputTrackedFile('test-dummy.txt')
 
 # _output_kw = Node.from_func
 @Node.from_func({
@@ -27,19 +28,35 @@ def out5(  self, numberFile, letterFile ):
     return
 
 
-@Node.from_func({
-    "OUT":TrackedFile("tests-out10.txt"),
-#     "BAM":TrackedFile( "test.fastq.bam"  )
-})
-def out10(  self, numberFile, letterFile ):
-    '''
-    some doc
-    '''
-    number = numberFile().open('r').read().strip()
-    letter = letterFile().open('r').read().strip()
-    with self.output_kw['OUT'].open("w") as f:
-        f.write( 10 * (number+letter)+'\n')
-    return
+if 1:
+    @Node.from_func({
+        "OUT":TrackedFile("tests-out10.txt"),
+    })
+    def out10(  self, numberFile, letterFile ):
+        '''
+        some doc
+        '''
+        '''
+        '''
+        number = numberFile().open('r').read().strip()
+        letter = letterFile().open('r').read().strip()
+        with self.output_kw['OUT'].open("w") as f:
+            f.write( 10 * (number+letter)+'\n')
+        return
+
+
+# @Node.from_func({
+#     "OUT":TrackedFile("test-combined_short.txt"),
+# #     "BAM":TrackedFile( "test.fastq.bam"  )
+# })
+# def make_combined_short( self, out5, out15, ):
+#     lines = []
+#     [ lines.extend(list(x()['OUT'].open('r'))) for x in [out5,
+#                                                          out15,
+#                                                         ]]
+#     with self['OUT'].open('w') as f:
+#         map(f.write,lines)
+#     return 1
 
 @Node.from_func({
     "OUT":TrackedFile("tests-out15.txt"),

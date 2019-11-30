@@ -4,24 +4,38 @@ from collections import OrderedDict as _dict
 from filelock import FileLock
 import json
 import dill
-import os
+import os,sys
 from decorator import decorator
-
+import types
 _DEBUG = 1
 
+
+### getsource
+import inspect
+import linecache 
+from _inspect_patch import inspect
+
+from _ast_util import ast_proj
 def file_not_empty(fpath):  
     '''
     Source: https://stackoverflow.com/a/15924160/8083313
     '''
     return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
 
-def os_stat_result_null():
-    return os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)]) 
+@property
+def os_stat_result_null(
+    _null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
+    ):
+    return _null
+
 def os_stat_safe(fname):
     if file_not_empty(fname):
         return os.stat(fname)
     else:
-        return os_stat_result_null()
+        return os_stat_result_null
+
+# def file_not_empty(fpath):
+#     return os_stat_safe(fpath) != os_stat_result_null
 
 def frame__default(frame=None):
     '''
@@ -56,6 +70,7 @@ class cached_property(object):
     
 def _open(*a):
     assert isinstance(a[0])
+
 class BaseFile(object):
     _DEBUG = _DEBUG
     DEBUG_NO_CACHE = 0
@@ -96,14 +111,14 @@ def index_file_read(fname,):
             d = dill.load(f, )
             # object_pairs_hook=_dict)
     else:
-        d = {}
+        d = _dict()
     return d
 
 
 
 update_queue = _dict()
-def index_file_update( fname, key):
-    update_queue[key] = dict(stat_result = os.stat( key ))
+def index_file_update( key, value):
+    update_queue[key] = value
 
 def index_file_flush(fname=None,frame=None):
     if fname is None:
@@ -115,6 +130,7 @@ def index_file_flush(fname=None,frame=None):
         with open(fname,"w") as f:
             dill.dump( d, f)
 
+# def code_index_update( fname, key)
 
             # return f.read()
 
@@ -145,10 +161,10 @@ class TrackedFile(BaseFile):
     def _hook_indexed_missing_file(self):
         if "indexed_missing_file" in self.HOOKS_ENABLED_LIST:
             ### when file is indexed but absent
-            raise IndexedMissingFileError(os.getcwd()+'|'+str(self)+str(self.parent))
+            raise IndexedMissingFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
     def _hook_indexed_diff_file(self):
         if "indexed_diff_file" in self.HOOKS_ENABLED_LIST:
-            raise IndexedDiffFileError(self)
+            raise IndexedDiffFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
 
     def _changed(self, ):
         '''
@@ -159,7 +175,8 @@ class TrackedFile(BaseFile):
         '''
         if self.DEBUG_NO_CACHE:
             return 1
-        rec = self.parent.cached_index_dict.get( self.path , None)
+        rec = self.indexFile.cached_index_dict.get( self.path , None)
+        # file_absent = os_stat_safe(self.path) == os_stat_result_null
         file_absent = not file_not_empty(self.path)
         index_absent = rec is None
 
@@ -173,6 +190,7 @@ class TrackedFile(BaseFile):
             states.append("INDEX_ABSENT")
 
         if file_absent and not index_absent:
+
             self._hook_indexed_missing_file()
 
         if not (file_absent or index_absent):
@@ -181,7 +199,7 @@ class TrackedFile(BaseFile):
             v2 = st_time_size( os_stat_safe(self.path) )
             if  v1!= v2:
                 if self.VERBOSE:
-                    print self.path, zip(v1,v2)
+                    print (self.path, zip(v1,v2))
                 val=1; states.append("DIFF")
                 self._hook_indexed_diff_file()
             else:
@@ -191,7 +209,14 @@ class TrackedFile(BaseFile):
         # return (0,"SAME")
 
     def index_update(self,):
-        return index_file_update( self.parent.path, self.path)
+        # if not file_not_empty(self.path):
+        #     path.Path(self.path).dirname()
+        #     os.path.makedirs_p()
+        index_file_update( 
+            self.path, 
+            dict(stat_result = os.stat( self.path ))
+        )
+        return 
 
     @cached_property
     def changed(self):
@@ -201,13 +226,12 @@ class TrackedFile(BaseFile):
         return val
 
     
-    def __init__(self, path, parent=None, frame=None):
+    def __init__(self, path, frame=None):
         self._frame = frame__default(frame)
-        if parent is None:
-            parent = index_get_default(self._frame)
+        self.indexFile = self._frame.f_locals['_indexFile']
+            # parent = index_get_default(self._frame)
         del self._frame
 
-        self.parent =  parent
         super(TrackedFile,self).__init__(path)
 
 def frame_init(frame=None):
@@ -216,17 +240,21 @@ def frame_init(frame=None):
     '''
     frame = frame__default(frame)
     print ("[FRAME_INIT] _symbolicInputNode, _symbolicOutputNode")
+    indexFile = frame.f_locals['_indexFile'] = index_get_default(frame)
+    # indexFile = frame.f_locals['_indexFileNode'] = index_get_default(frame)
+
+
     frame.f_locals['_symbolicRootNode'] = rootNode = SymbolicRootNode(
-        lambda self:None,
-        {},{},0,frame,1,'_symbolicRootNode', None)
+        lambda self:[x() for x in self.input_kw.values()],
+        _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)
+
     frame.f_locals['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
         lambda self:[x() for x in self.input_kw.values()],
-        {},{},0,frame,1,'_symbolicOutputNode',None)
-    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(
-        lambda self:None,
-        {},{},0,frame,1,'_symbolicInputNode',None)
+        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
 
-    indexFile = frame.f_locals['_indexFile'] = index_get_default(frame).path
+    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
+        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)
+
     return symin,symout,indexFile
 
 # _counter = -1
@@ -271,7 +299,7 @@ class InputTrackedFile(TrackedFile):
         # print self.get_node_name(name)
         self.node = nodeClass( 
             lambda self, _symbolicInputNode:None,
-            input_kw = {}, output_kw={'FILE':self}, force=force,
+            input_kw = _dict(), output_kw={'FILE':self}, force=force,
             frame = frame, skip=skip,
             name=self.get_node_name(name),
             tag = path,
@@ -288,6 +316,10 @@ class InputTrackedFile(TrackedFile):
     def _hook_indexed_diff_file(self):
         print("INPUT_FILE_CHANGED:%s"%self)
         # raise IndexedDiffFileError(self)        
+    @property
+    def called_value(self):
+        return self.node.called_value
+
 
     pass
 
@@ -320,12 +352,16 @@ def func__fill_defaults(skip=0,frame=None):
 
 class _INIT_VALUE(object):
     pass
+class ChangedNodeError(Exception):
+    pass
 returned =  _INIT_VALUE()
 class RawNode(object):
     _DEBUG = _DEBUG
     returned = returned
     AUTO_UPDATE_OUTPUT = 0
+    VERBOSE = 1
     OLD = 0
+    force_index_update = 0 
     '''
     Decorate a function by
         filling the positional arguments
@@ -341,7 +377,7 @@ class RawNode(object):
     @cached_property
     def changed(self):
         '''
-        A node is changed if:
+        node.changed indicate the result needs re-computation, if:
           - its code is changed 
           - its output is changed
         '''
@@ -349,7 +385,7 @@ class RawNode(object):
         if self.force:
            print("CHANGED_FORCED:%s"%self)
            return 1
-        if self._changed_code():
+        if self._changed_code()[0]:
             print( "CHANGED_CODE:%s"%self)
             return 1
         if self._changed_output():
@@ -393,13 +429,95 @@ class RawNode(object):
                 assert 0, (k,type(v),v)
         return lst
 
+    def _hook_indexed_diff_file(self):
+        return 1
+
+    def _hook_indexed_missing_file(self):
+        return 1
+
+    def _hook_code_input_kw_smaller(self):
+        _ = '''
+        a shrinking input_kw should not trigger a rerun
+        '''
+        self.force_index_update = 1
+        return 0
+
     def _changed_code(self):
         '''
         Detect whether the underlying function has changed when compared to 
         '''
-        if self._DEBUG:
-            return 0
+        # if self._DEBUG:
+        #     return (0,'DEBUG')
+
+        rec = self.indexFile.cached_index_dict.get( self.name, None)
+        file_absent = False ### this is when a node is deleted from a file
+        index_absent = rec is None
+
+        states = [] 
+
+        # ### not relevant
+        if file_absent:
+            val = 1
+            states.append('TARGET_ABSENT')
+
+        if index_absent:
+            val = 1
+            states.append("INDEX_ABSENT")
+
+        if file_absent and not index_absent:
+            val = 1
+            self._hook_indexed_missing_file()
+
+        if not (file_absent or index_absent):
+            v1 = rec['data']
+            v2 = self.as_data()['data']
+            assert len(v1) == len(v2),(v1.keys(),v2.keys())
+
+            print (self,self.func_orig.func_code)
+            # print self,v1==v2
+            if self.name =='out10':
+                print (self,self.func_orig.func_code)
+                if 0:
+                    if 'line 32' in repr(self.func_orig.func_code):
+                        import pdb,traceback
+                        print(traceback.format_exc())
+                        import traceback
+                        traceback.print_stack()
+                        traceback.print_exc()
+                        pdb.set_trace()
+
+                # print '\n'.join(v1['func_sourcelines'])
+                # print '\n'.join(v2['func_sourcelines'])
+                # print vars(self)
+                # print globals()
+
+            for v in (v1,v2):
+                v['func_ast_tree'] = ast_proj( '\n'.join(v.pop('func_sourcelines'))) ###  exclude from comparision
+            if  v1 != v2:
+                diff = _dict()
+                for (k, oldv),(k1, newv) in zip(v1.items(),v2.items()):
+                    if self.VERBOSE >= 2:
+                        sys.stdout.write("%s\n"%[(k,oldv==newv),oldv,newv])
+                    assert k==k1,(k,k1, oldv, newv)
+                    if oldv!=newv:
+                        diff[k] = (oldv, newv)
+
+                # print diff.keys()
+                if diff.keys() == ['input_kw_keys']:
+                    oldv, newv =  diff['input_kw_keys']
+                    if set(newv).issubset(oldv):
+                        return ( self._hook_code_input_kw_smaller(), states)
+                states.append("DIFF")
+                return (  self._hook_indexed_diff_file(),  states)
+            else:
+                val=0; states.append("SAME")
+                return (val, states)
+
+        if self.VERBOSE:
+            print (self, val,states)
+        return val,states
         assert 0
+
     def __repr__(self):
         return '<Node with func:%s%s>' % (self.f.__name__, 
                 ':tag:%s'% self.tag if self.tag else '')
@@ -407,7 +525,8 @@ class RawNode(object):
         return self.output_kw[key]
 
 
-
+    # def input_kw(self):
+    #     return  
     def _attach_func(self, func, frame, skip):
         '''
         Decorate and attach the function 
@@ -429,13 +548,11 @@ class RawNode(object):
         self.func = func
         
         ### add input_kw
+        # self.input_kw_keys = args[skip:]
         (args, varargs, keywords, defaults) = inspect.getargspec(func)
         self.input_kw.update(zip(args[skip:], defaults))
         return 
-    @property
-    def name(self):
-        return self.f.__name__
-    
+
     @classmethod
     def from_func(cls, output_kw, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
         def _dec(func):
@@ -450,76 +567,145 @@ class RawNode(object):
 
         
         return _dec        
+
+    @property
+    def name(self):
+        return self.f.__name__
     
     def __init__(self, func, input_kw, output_kw, force, frame, skip, name, tag):
         if name is not None:
             func.__name__ = name
+        self.func_orig = func
+        # self.func_orig_source = _get_func_source(func)
         self.f = func
         self.tag = tag
         self.input_kw = input_kw  or _dict()
         self.output_kw = output_kw
         self.force = force
-        self._frame = frame__default(frame)
+        # self._frame = 
+        frame = frame__default(frame)
+        self.indexFile = frame.f_locals['_indexFile']
         self._attach_func(func, frame, skip)
         self._attach_to_root(frame)
-        del self._frame
-        return  
+        # del self._frame
+        return 
+
     def _attach_to_root(self,frame=None):
         frame = frame__default(frame)
-        frame.f_locals['_symbolicRootNode'].input_kw[ self.f.__name__ ] = self
+        self._root = _root = frame.f_locals['_symbolicRootNode']
+        self._root.input_kw[ self.f.__name__ ] = self
 
         pass
+    def _get_func_code(self, func):
+        linecache.checkcache( self.indexFile.path.replace('.py.index','.py'))
+        # func.__module__.__file__)
+        return  inspect.getsource(func)
 
-
+    @cached_property
     def called_value(self,*a,**kw):
-        return self._run_result
+        if self.changed_upstream:
+            [ x.called_value for x in self.input_kw.values() ]
+        if self.changed: 
+        # if self.changed_upstream:
+            # result = self._run_result
+            print("RUNNING:%s"%self)
+            result = self.func(self,*a,**kw)
+
+            runned = 1
+            # return self._run(*a,**kw)
+        else:
+            result = self.output_kw
+            runned = 0
+
+        if runned or self.force_index_update:
+            _ = '''
+            Once running is complete, trigger an update t o index file
+            '''
+            [x.index_update() for x in self.output_kw.values()]
+            index_file_update( self.name, self.as_data())
+
+        self.committed = 1
+        return result 
+
+        # return self._run_result
 
     def __call__(self,*a,**kw):
         return self.called_value
 
-    def index_update_output_kw(self):
-        return [x.index_update() for x in self.output_kw.values()]
+    # def index_update_output_kw(self):
+    #     [x.index_update() for x in self.output_kw.values()]
+        # return 
+    def as_data(self):
+        src = self._get_func_code(self.func_orig)
 
-    @cached_property
-    def _run_result(self,*a,**kw):
+        return _dict(data=_dict([
+                    ("func_sourcelines", src.splitlines()),
+                    # ("func_ast_tree", ast_proj(src) ), 
+                    # ("func_code", (self.func_orig_source)), 
+                    ("input_kw_keys",self.input_kw.keys()), 
+                    ("output_kw_keys",self.output_kw.keys()), 
+                    ("name",self.name ),
+                    ("tag",self.tag)
+                    ]))
 
-        print("RUNNING:%s"%self)
-        output = self.func(self,*a,**kw)
 
-        _ = '''
-        # Running would change the outputTrackedFile, 
-        and considered as an unexpected change when evaluating self.changed()
-        '''
-        self.index_update_output_kw()
-        return output
+
+def _get_func_code(func):
+    del func.__doc__
+    code = func.__code__
+    # return code.co_code
+
+    _varnames = () ### varnames is already in input_kw
+    _code = types.CodeType(
+        code.co_argcount,
+        code.co_nlocals,
+        code.co_stacksize,
+        code.co_flags,
+        code.co_code,  ### important
+        code.co_consts, #### if docstring is present
+        code.co_names,
+        (), #  code.co_varnames,
+        "", #  code.co_filename,
+        "", #  code.co_name,
+        0 , # code.co_firstlineno,
+        "",  # code.co_lnotab,
+        code.co_freevars,
+        code.co_cellvars,
+    )    
+    # return code.co_code
+    return (code.co_consts,code.co_code)
+    # return _code
+
+
+
 
 class AutoNode(RawNode):
     # _DEBUG = 0
+    pass
+    # @property
+    # # @cached_property ### less verbose
+    # def called_value(self,*a,**kw):
+    #     _ = '''
+    #     This is a bit redundant
+    #     This is only called if the node is explicitly called
+    #     Usually a node should be specified in "input_kw", and updated by 
+    #     invoking "child_node.changed_upstream", aka if the upstream is changed then the node
+    #     should be runned. 
+    #     But in fact, the node should be run even if its own files got changed
 
-    @property
-    # @cached_property ### less verbose
-    def called_value(self,*a,**kw):
-        _ = '''
-        This is a bit redundant
-        This is only called if the node is explicitly called
-        Usually a node should be specified in "input_kw", and updated by 
-        invoking "child_node.changed_upstream", aka if the upstream is changed then the node
-        should be runned. 
-        But in fact, the node should be run even if its own files got changed
+    #     Thus, the node should be updated if node.changed
 
-        Thus, the node should be updated if node.changed
+    #     '''
 
-        '''
-
-        # if self._DEBUG:
-        #     print ('[UPSTREAM_OF]',self,)
-        # print ('[UPSTREAM_IS]',self.changed_upstream)
-        if self.changed:
-        # if self.changed_upstream:
-            return self._run_result
-            # return self._run(*a,**kw)
-        else:
-            return self.output_kw ### 
+    #     # if self._DEBUG:
+    #     #     print ('[UPSTREAM_OF]',self,)
+    #     # print ('[UPSTREAM_IS]',self.changed_upstream)
+    #     if self.changed:
+    #     # if self.changed_upstream:
+    #         return self._run_result
+    #         # return self._run(*a,**kw)
+    #     else:
+    #         return self.output_kw ### 
 
 class SymbolicRootNode(AutoNode):
     

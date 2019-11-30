@@ -18,8 +18,8 @@ def pipe_run(self):
     # nodes = [self._symbolicOutputNode.input_kw]
     # self._symbolicOutputNode()
     [x() for x in self._symbolicRootNode.input_kw.values()]
-    print os.path.realpath( self._indexFile )
+    # print os.path.realpath( self._indexFile.path )
     # for x in  self._symbolicOutputNode.input_kw
     # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
-    index_file_flush(fname=self._indexFile,)
+    index_file_flush(fname=self._indexFile.path,)
     print('END' + 20*"-")
