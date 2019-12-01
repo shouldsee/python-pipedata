@@ -1,7 +1,7 @@
-import pipedata; 
-from pipedata import AutoNode as Node
-from pipedata import RawNode
-from pipedata import TrackedFile, InputTrackedFile, OutputTrackedFile, frame_init
+# import pipedata
+from pipedata.pipedata import AutoNode as Node
+from pipedata.pipedata import RawNode
+from pipedata.pipedata import TrackedFile, InputTrackedFile, OutputTrackedFile, frame_init
 import os
 
 import time
@@ -22,6 +22,10 @@ def out5(  self, numberFile, letterFile ):
     '''
     some doc
     '''
+    print type(numberFile()),type(numberFile)
+    print getattr(numberFile(),"values",lambda:())()
+    # if isinstnace(numberFile(),)
+    # assert 0,
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
@@ -46,18 +50,18 @@ if 1:
         return
 
 
-# @Node.from_func({
-#     "OUT":TrackedFile("test-combined_short.txt"),
-# #     "BAM":TrackedFile( "test.fastq.bam"  )
-# })
-# def make_combined_short( self, out5, out15, ):
-#     lines = []
-#     [ lines.extend(list(x()['OUT'].open('r'))) for x in [out5,
-#                                                          out15,
-#                                                         ]]
-#     with self['OUT'].open('w') as f:
-#         map(f.write,lines)
-#     return 1
+@Node.from_func({
+    "OUT":TrackedFile("test-combined_short.txt"),
+#     "BAM":TrackedFile( "test.fastq.bam"  )
+})
+def make_combined_short( self, out5, out15, ):
+    lines = []
+    [ lines.extend(list(x()['OUT'].open('r'))) for x in [out5,
+                                                         out15,
+                                                        ]]
+    with self['OUT'].open('w') as f:
+        map(f.write,lines)
+    return 1
 
 @Node.from_func({
     "OUT":TrackedFile("tests-out15.txt"),

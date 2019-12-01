@@ -301,7 +301,7 @@ class InputTrackedFile(TrackedFile):
         # print self.get_node_name(name)
         self.node = nodeClass( 
             lambda self, _symbolicInputNode:None,
-            input_kw = _dict(), output_kw={'FILE':self}, force=force,
+            input_kw = _dict(), output_kw= {'PATH':self}, force=force,
             frame = frame, skip=skip,
             name = self.get_node_name(name),
             tag = path,
@@ -638,12 +638,11 @@ class RawNode(object):
         # if self.changed_upstream:
             # result = self._run_result
             print("RUNNING:%s"%self)
-            result = self.func(self,*a,**kw)
+            self.returned = self.func(self,*a,**kw)
 
             runned = 1
             # return self._run(*a,**kw)
         else:
-            result = self.output_kw
             runned = 0
 
         if runned or self.force_index_update:
@@ -654,7 +653,7 @@ class RawNode(object):
             index_file_update( self.name, self.as_data())
 
         self.committed = 1
-        return result 
+        return self
 
         # return self._run_result
 

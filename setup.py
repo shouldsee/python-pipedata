@@ -7,11 +7,7 @@ os.chdir(os.path.dirname(__file__))
 setup(
 	name='pipedata',
 	version='0.0.1',
-    packages=['pipedata',],
-# 	packages=[
-# 		'.'
-# #        'delay_and_cache',
-#              ],
+        packages=['pipedata',],
 	include_package_data=True,
 	license='MIT',
 	author='Feng Geng',
