@@ -152,13 +152,14 @@ class IndexedDiffFileError(Exception):
     pass
 
 
+def NodeFromFunc(*a,**kw):
+    return RawNode.from_func(*a,**kw)
+
 class _INIT_VALUE(object):
     pass
 class ChangedNodeError(Exception):
     pass
 returned =  _INIT_VALUE()
-
-
 class RawNode(object):
     '''
     Decorate a function by
@@ -201,7 +202,7 @@ class RawNode(object):
         self.f = func
         self.tag = tag
         # self.input_kw = input_kw  or _dict()
-        self.output_kw = output_kw
+        self.init_output_kw = output_kw
         self.force = force
         # self._frame = 
         frame = frame__default(frame)
@@ -323,7 +324,6 @@ class RawNode(object):
             v2 = self.as_data()['data']
             assert len(v1) == len(v2),(v1.keys(),v2.keys())
 
-            _dbg = 1
             srcs =  []     
             trees = []
             for v in (v1,v2):
@@ -340,7 +340,7 @@ class RawNode(object):
                 traceback.print_exc()
                 pdb.set_trace()
 
-            if _dbg:
+            if 0:
                 if self.name =='out5':
                     print (srcs[0])
                     print (trees[0])
@@ -357,13 +357,13 @@ class RawNode(object):
             if  v1 != v2:
                 diff = _dict()
                 for (k, oldv),(k1, newv) in zip(v1.items(),v2.items()):
-                    self.VERBOSE = 2
+                    # self.VERBOSE = 2
                     if self.VERBOSE >= 2:
                         sys.stdout.write("%s\n"%[(k,oldv==newv),oldv,newv])
                     assert k==k1,(k,k1, oldv, newv)
                     if oldv!=newv:
                         diff[k] = (oldv, newv)
-                        
+
                 # if self.name =='out5':
                 #     _dbgf()
 
@@ -412,6 +412,10 @@ class RawNode(object):
     # def output_kw(self)
     #     input_kw,output_kw = self.initialised_tuples
     #     return output_kw
+    @property
+    def func(self):
+        return self.func_orig
+    
 
     @cached_property
     def initialised_tuples(self):
@@ -431,15 +435,13 @@ class RawNode(object):
             return input_kw,output_kw
 
         ### fill default and add decorate to return output_kw
-        func = self.func_orig
-        input_kw,output_kw = _dec(func)
-        # func = self._decorate_change_output(func)
-        self.func = func
-        # output_kw = {}
-
-        # self.output_kw_frozen = output_kw or self.output_kw
-        # self.output_kw = (self.output_kw_forzen).copy()
-        self.output_kw = output_kw or self.output_kw
+        # self.func = self.func_orig
+        input_kw,output_kw = _dec(self.func)
+        if output_kw:
+            assert not self.init_output_kw,"Decorator must be empty if the 3rd argument exists of funcion %s" % self.func.func_code
+            self.output_kw = output_kw
+        else:
+            self.output_kw = self.init_output_kw
         self._level_stream.update( self.output_kw.values() )
 
         return input_kw,output_kw

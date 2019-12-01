@@ -51,8 +51,6 @@ class PipeRunner(object):
         pipe_run(self.pipe)
         return self.pipe
     
-# class index_diff_error(Exception):
-#     pass
 
 class Case(unittest.TestCase):
     def test_import(self):
@@ -154,7 +152,7 @@ rm tests-out5.txt
 
 
 ### changed 10 to 25
-@Node.from_func({
+@RawNode.from_func({
     "OUT":TrackedFile("tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -178,7 +176,7 @@ def out10(  self, (numberFile, letterFile),):
                 f.write(r'''
 ### add dependency on dummy file
 dummyFile = InputTrackedFile('test-dummy.txt')
-@Node.from_func({
+@RawNode.from_func({
     "OUT":TrackedFile("tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -205,7 +203,7 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
         with path.Path(self.test_1()).makedirs_p() as d:
             with open("pipe.py",'a+') as f:
                 f.write(r'''
-@Node.from_func({{
+@RawNode.from_func({{
     "OUT":TrackedFile("tests-out10.txt"),
 }})
 def out10(  self, (numberFile, letterFile),):
@@ -243,7 +241,7 @@ def out10(  self, (numberFile, letterFile),):
 #             pipe_run(pipe)
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            pipe.Node.OLD = 1
+            # pipe.Node.OLD = 0
             pipe.TrackedFile.VERBOSE = 0
 
 #             OLD = 1
@@ -253,7 +251,7 @@ def out10(  self, (numberFile, letterFile),):
 #             return
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            pipe.RawNode.OLD = 0
+            # pipe.RawNode.OLD = 0
             pipe.TrackedFile.VERBOSE = 0
             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
             
@@ -266,7 +264,7 @@ rm tests-out5.txt
             
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            pipe.RawNode.OLD = 0
+            # pipe.RawNode.OLD = 0
             pipe.TrackedFile.VERBOSE = 0
             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
             
