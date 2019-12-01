@@ -2,7 +2,9 @@
 import unittest
 unittest.TestCase.assertRaises
 
-import os
+import os,sys
+#sys.path.insert(0,os.getcwd())
+#os.chdir('..')
 # from pymisca.tree import getPathStack
 import path
 # def getPathStack(x):
