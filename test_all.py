@@ -151,7 +151,7 @@ rm tests-out5.txt
     "OUT":TrackedFile("tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
-def out10(  self, numberFile, letterFile ):
+def out10(  self, (numberFile, letterFile),):
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
     with self.output_kw['OUT'].open("w") as f:
@@ -174,7 +174,7 @@ dummyFile = InputTrackedFile('test-dummy.txt')
     "OUT":TrackedFile("tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
-def out10(  s, numberFile, letterFile,  dummyFile ):
+def out10(  s, (numberFile, letterFile,  dummyFile) ):
 
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
@@ -200,7 +200,7 @@ def out10(  s, numberFile, letterFile,  dummyFile ):
 @Node.from_func({{
     "OUT":TrackedFile("tests-out10.txt"),
 }})
-def out10(  self, numberFile, letterFile ):
+def out10(  self, (numberFile, letterFile),):
     ###
     
     "some random comments"

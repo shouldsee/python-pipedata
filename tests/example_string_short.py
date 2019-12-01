@@ -17,7 +17,7 @@ print (_symbolicRootNode.input_kw)
     "OUT":TrackedFile("tests-out5.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
-def out5(  self, numberFile, letterFile ):
+def out5(  self, (numberFile, letterFile) ):
     '''
     some doc
     '''
@@ -36,7 +36,7 @@ if 1:
     @Node.from_func({
         "OUT":TrackedFile("tests-out10.txt"),
     })
-    def out10(  self, numberFile, letterFile ):
+    def out10(  self, (numberFile, letterFile) ):
         '''
         some doc
         '''
@@ -53,7 +53,7 @@ if 1:
     "OUT":TrackedFile("test-combined_short.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
-def make_combined_short( self, out5, out15, ):
+def make_combined_short( self, (out5, out15,) ):
     lines = []
     [ lines.extend(list(x()['OUT'].open('r'))) for x in [out5,
                                                          out15,
@@ -66,7 +66,7 @@ def make_combined_short( self, out5, out15, ):
     "OUT":TrackedFile("tests-out15.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
-def out15(  self, numberFile, letterFile ):
+def out15(  self, (numberFile, letterFile) ):
     '''
     some doc
     '''
@@ -80,7 +80,7 @@ def out15(  self, numberFile, letterFile ):
 @Node.from_func({
     'OUT':TrackedFile('tests-combined.txt')
 })
-def make_combined( self, out5, out10, out15, ):
+def make_combined( self, (out5, out10, out15,) ):
     lines = []
     [ lines.extend(list(x()['OUT'].open('r'))) for x in [out5,
                                                          out10,out15

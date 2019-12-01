@@ -301,7 +301,7 @@ class InputTrackedFile(TrackedFile):
         # traceback.print_stack()
         # print self.get_node_name(name)
         self.node = nodeClass( 
-            lambda self, _symbolicInputNode:None,
+            lambda self, (_symbolicInputNode,):None,
             input_kw = _dict(), output_kw= {'PATH':self}, force=force,
             frame = frame, skip=skip,
             name = self.get_node_name(name),
@@ -345,12 +345,22 @@ def func__fill_defaults(skip=0,frame=None, d=None):
             assert frame is None
         (args, varargs, keywords, defaults) = inspect.getargspec(f)
         defaults = defaults or () ## this is for kwargs
+
+        # for key in args[ skip:len(args) - len(defaults)][::-1]:
+        #     defaults = (d[key],)+defaults
+        # f.__defaults__ = defaults
+        # if len(args)==3:
+        #     self, input, output = args 
+        # elif len(args)==2:
+        self, input, output = args + ( 3 - len(args) ) * [(),]
+        # len(args)
+        lst  = []
+        for key in input:
+            lst.append(d[key])
+        f.__defaults__ = (lst,)
         # print args,defaults
-        for key in args[ skip:len(args) - len(defaults)][::-1]:
-            defaults = (d[key],)+defaults
-        f.__defaults__ = defaults
         # print defaults
-        return f
+        return _dict(zip(input,lst))
 #             (args, varargs, keywords, defaults) = inspect.getargspec(func)
     return _dec
 
@@ -561,10 +571,6 @@ class RawNode(object):
         assert 0
 
 
-
-    # def input_kw(self):
-    #     return  
-
     # @staticmethod
     def _decorate_change_output(self,f):
         @decorator
@@ -589,15 +595,15 @@ class RawNode(object):
         skip = 1
         ### fill default and add decorate to return output_kw
         func = self.func_orig
-        func = func__fill_defaults( skip,  None, self._root.input_kw )(func)
+        input_kw = func__fill_defaults( skip,  None, self._root.input_kw )(func)
         func = self._decorate_change_output(func)
         self.func = func
         
         ### add input_kw
         # self.input_kw_keys = args[skip:]
-        (args, varargs, keywords, defaults) = inspect.getargspec(func)
-        defaults =defaults or ()
-        input_kw = _dict(zip(args[skip:], defaults))
+        # (args, varargs, keywords, defaults) = inspect.getargspec(func)
+        # defaults =defaults or ()
+        # input_kw = _dict(zip(args[skip:], defaults))
         return input_kw
 
     @classmethod

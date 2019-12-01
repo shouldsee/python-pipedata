@@ -28,3 +28,7 @@ python2 test.py
     rv = reduce(self.proto)
 TypeError: can't pickle odict_keys objects
 ```
+
+1. Add a variableNode
+
+1. figure out whether to use absolute or relative path 
