@@ -22,3 +22,9 @@ python2 test.py
 
 1. careful with inspect.getsource
 
+1. Python3 OrderedDict is wicked...
+```
+  File "/usr/lib/python3.6/pickle.py", line 496, in save
+    rv = reduce(self.proto)
+TypeError: can't pickle odict_keys objects
+```

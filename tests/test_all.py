@@ -302,6 +302,6 @@ if __name__ == '__main__':
 #         del sys.argv[sys.argv.index('-1')]
 #         runner.run(testCase())
 #     else:
-    unittest.main()
-    # unittest.main(testRunner = debugTestRunner())
+    # unittest.main()
+    unittest.main(testRunner = debugTestRunner())
 #     unittest.findTestCases(__main__).debug()

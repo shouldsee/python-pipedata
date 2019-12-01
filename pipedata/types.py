@@ -109,7 +109,7 @@ def index_get_default(frame=None):
 def index_file_read(fname,):
     # with FileLock( fname +'.lock') as lock:
     if file_not_empty(fname):
-        with open( fname, "r") as f:
+        with open( fname, "rb") as f:
             # it = ()
             d = dill.load(f, )
             # object_pairs_hook=_dict)
@@ -118,6 +118,7 @@ def index_file_read(fname,):
     return d
 
 
+# import pickle as dill
 
 update_queue = _dict()
 def index_file_update( key, value):
@@ -130,8 +131,8 @@ def index_file_flush(fname=None,frame=None):
     with FileLock( fname +'.lock') as lock:
         d = index_file_read(fname)
         d.update( update_queue )
-        with open(fname,"w") as f:
-            dill.dump( d, f)
+        with open(fname,"wb") as f:
+            dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
 
 # def code_index_update( fname, key)
 
@@ -595,6 +596,7 @@ class RawNode(object):
         ### add input_kw
         # self.input_kw_keys = args[skip:]
         (args, varargs, keywords, defaults) = inspect.getargspec(func)
+        defaults =defaults or ()
         input_kw = _dict(zip(args[skip:], defaults))
         return input_kw
 
