@@ -1,16 +1,15 @@
 # import pipedata
-from pipedata.pipedata import AutoNode as Node
-from pipedata.pipedata import RawNode
-from pipedata.pipedata import TrackedFile, InputTrackedFile, OutputTrackedFile, frame_init
+from pipedata.types import AutoNode as Node
+from pipedata.types import RawNode
+from pipedata.types import TrackedFile, InputTrackedFile, OutputTrackedFile, frame_init
 import os
-
 import time
 
 symin, symout, index= frame_init()
-print "[indexFile]",_indexFile
+print ("[indexFile]",_indexFile)
 numberFile = InputTrackedFile('tests-number.txt',name='numberFile')
 letterFile = InputTrackedFile('tests-letter.txt',name='letterFile')
-print _symbolicRootNode.input_kw
+print (_symbolicRootNode.input_kw)
 # dummyFile = InputTrackedFile('test-dummy.txt')
 
 # _output_kw = Node.from_func
@@ -22,8 +21,8 @@ def out5(  self, numberFile, letterFile ):
     '''
     some doc
     '''
-    print type(numberFile()),type(numberFile)
-    print getattr(numberFile(),"values",lambda:())()
+    print (type(numberFile()),type(numberFile))
+    print (getattr(numberFile(),"values",lambda:())())
     # if isinstnace(numberFile(),)
     # assert 0,
     number = open( numberFile().path, 'r').read().strip()

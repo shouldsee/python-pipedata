@@ -18,7 +18,7 @@ _DEBUG = 1
 
 # from _inspect_patch import inspect
 
-from _ast_util import ast_proj
+from pipedata._ast_util import ast_proj
 def file_not_empty(fpath):  
     '''
     Source: https://stackoverflow.com/a/15924160/8083313
@@ -514,8 +514,8 @@ class RawNode(object):
                 v['func_ast_tree'] = _tree = ast_proj(src) ###  exclude from comparision
                 # print '\n'.join()
                 if _dbg:
-                    print src
-                    print _tree
+                    print (src)
+                    print (_tree)
 
             if _dbg:
                 if self.name =='out10':

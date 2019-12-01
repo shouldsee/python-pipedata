@@ -7,6 +7,7 @@ import os,sys
 #os.chdir('..')
 # from pymisca.tree import getPathStack
 import path
+import imp
 # def getPathStack(x):
 #     return path.Path(x[0])
 
@@ -18,8 +19,8 @@ from pipedata.pipe_run import pipe_run
 # , _load_source
 import imp
 import sys
-import pipedata.pipedata as pipedata
-from pipedata.pipedata import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
+import pipedata._pipedata as pipedata
+from pipedata._pipedata import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 # import os as pip/e
 def _shell(cmd,shell=True):
     sys.stderr.write("[CMD]%s\n"%cmd)
@@ -36,8 +37,8 @@ class PipeRunner(object):
             fname
         self.key = key
         key = self.key
-        import pipedata.pipedata as pipedata
-        reload(pipedata)
+        import pipedata.types as pipedata
+        imp.reload(pipedata)
         pipedata.IndexedDiffFileError = IndexedDiffFileError
         pipedata.IndexedMissingFileError = IndexedMissingFileError
         pipedata.ChangedNodeError = ChangedNodeError
@@ -91,15 +92,15 @@ class testCase(unittest.TestCase):
     def test_1(self):
         dirname = self.make_copy()
         with path.Path(dirname) as d:
-            print _shell('''
+            print (_shell('''
     echo "1"> tests-number.txt; 
     echo a>tests-letter.txt; 
-            '''.format(**locals()))    
+            '''.format(**locals()))    )
 #             import pipe
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
 #             pipe_run(pipe)
             pipe = PipeRunner('pipe','pipe.py')()
-            print pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    
+            print (pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    )
         return dirname
     
     def test_indexedDiffFile(self):
@@ -127,9 +128,9 @@ rm tests-out5.txt
                 pr = PipeRunner('pipe','pipe.py')
                 f = pr.pipe.out10.f
                 _code = f.__code__
-                print _code.co_code.__repr__()
-                print _code.co_consts.__repr__()
-                print inspect.getsource(f)
+                print (_code.co_code.__repr__())
+                print (_code.co_consts.__repr__())
+                print (inspect.getsource(f))
 
             class index_diff_error(Exception):
                 pass
@@ -226,10 +227,10 @@ def out10(  self, numberFile, letterFile ):
     def test_changedVal(self):
         dirname = self.make_copy()
         with path.Path(dirname) as d:
-            print _shell('''
+            print (_shell('''
     echo "1"> tests-number.txt; 
     echo a>tests-letter.txt; 
-            '''.format(**locals()))    
+            '''.format(**locals()))  )
 #             import pipe
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
 #             pipe_run(pipe)
@@ -240,7 +241,7 @@ def out10(  self, numberFile, letterFile ):
 
 #             OLD = 1
             pipe = pr()
-            print pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    
+            print (pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    )
             
 #             return
             pr = PipeRunner('pipe','pipe.py')
@@ -268,7 +269,6 @@ rm tests-letter.txt
             nodes = pipe._symbolicRootNode.input_kw.values()
             [node.changed for node in nodes]
 #             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
-            print "[WTF]"
             [[sys.stderr.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
         
 #             pr.pipe

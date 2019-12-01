@@ -14,3 +14,11 @@ pip2 install https://github.com/shouldsee/python-pipedata/tarball/master --user
 ```bash
 python2 test.py
 ```
+### To-Do
+
+1. separate pipe_run.py from test_all.py, ideally each pipeline should be constructed upon module import 
+
+1. rename pipedata.py to types.py
+
+1. careful with inspect.getsource
+
