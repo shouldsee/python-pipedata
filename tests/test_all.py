@@ -54,7 +54,7 @@ class PipeRunner(object):
 # class index_diff_error(Exception):
 #     pass
 
-class testCase(unittest.TestCase):
+class Case(unittest.TestCase):
     def test_import(self):
         pass
 #         print "[CURR]",os.getcwd()
@@ -100,7 +100,7 @@ class testCase(unittest.TestCase):
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
 #             pipe_run(pipe)
             pipe = PipeRunner('pipe','pipe.py')()
-            print (pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    )
+            print (open(pipe._symbolicRootNode.input_kw['make_combined']['OUT'].path,'r').read()    )
         return dirname
     
     def test_indexedDiffFile(self):
@@ -108,6 +108,13 @@ class testCase(unittest.TestCase):
             _shell('''
 touch tests-out5.txt
 ''')
+            self.assertRaises( IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
+            pass
+        with path.Path(self.test_1()).makedirs_p() as d:
+            _shell('''
+echo 123> tests-out10.txt
+''')
+            # PipeRunner('pipe','pipe.py')()
             self.assertRaises( IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
             pass
         return
@@ -154,7 +161,7 @@ rm tests-out5.txt
 def out10(  self, (numberFile, letterFile),):
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
-    with self.output_kw['OUT'].open("w") as f:
+    with open(self['OUT']().path,'w') as f:
         f.write( 25 * (number+letter)+'\n')
     return
 ''')
@@ -166,6 +173,7 @@ def out10(  self, (numberFile, letterFile),):
 #                 print k,v.func_orig.func_code
 #             assert 0
             self.assertRaises( index_diff_error, getPr() )
+
             with open("pipe.py",'a+') as f:
                 f.write(r'''
 ### add dependency on dummy file
@@ -178,7 +186,7 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
 
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
-    with self.output_kw['OUT'].open("w") as f:
+    with open(self['OUT']().path,'w') as f:
         f.write( 10 * (number+letter)+'\n')
     return
 ''')
@@ -191,7 +199,7 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
             pass
         def getPr():
             pr =  PipeRunner('pipe','pipe.py')
-            pr.pipe.RawNode._hook_indexed_diff_file = lambda self:_raise(myError())
+            pr.pipe.RawNode._hook_indexed_diff_file = lambda self:_raise(myError("%s"%self))
             return pr        
         
         with path.Path(self.test_1()).makedirs_p() as d:
@@ -202,20 +210,19 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
 }})
 def out10(  self, (numberFile, letterFile),):
     ###
-    
     "some random comments"
     12334545
     
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
-    with self.output_kw['OUT'].open("w") as f:
+    with open(self['OUT']().path,'w') as f:
         f.write( 10 * (number+letter)+'\n')
     return
                 '''.format(
                     doc = '',
 #                     doc="'''docstirng'''"
-                ),
-                       )      
+                ),)
+
 #             pr =  PipeRunner('pipe','pipe.py')
 
             pr = getPr()
@@ -241,7 +248,7 @@ def out10(  self, (numberFile, letterFile),):
 
 #             OLD = 1
             pipe = pr()
-            print (pipe._symbolicRootNode.input_kw['make_combined']['OUT'].open('r').read()    )
+            print (open(pipe._symbolicRootNode.input_kw['make_combined']['OUT'].path,'r').read()    )
             
 #             return
             pr = PipeRunner('pipe','pipe.py')
@@ -274,6 +281,32 @@ rm tests-letter.txt
 #             pr.pipe
 #             print pipe._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read()    
         return dirname
+    def test_level_stream(self):
+        from pipedata.types import TrackedFile, InputTrackedFile,  frame_init
+        __file__ = 'test_temp.py'
+        frame_init()
+
+        out5 = InputTrackedFile("a.txt",input_func=lambda self,:None).node
+        File1 = InputTrackedFile("tests-out5.txt",input_func=lambda self,(out5,):None).node
+        File2 = InputTrackedFile("tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        out5.merge(File1)
+        out5.merge(File2)
+        # File2.merge(out5)
+        print (out5.level_stream)
+        print (File1.level_stream)
+        print (File2.level_stream)
+        assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
+
+        out5 = InputTrackedFile("a.txt",input_func=lambda self,:None).node
+        File1 = InputTrackedFile("tests-out5.txt",input_func=lambda self,(out5,):None).node
+        File2 = InputTrackedFile("tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        out5.merge(File1)
+        # out5.merge(File2)
+        File2.merge(out5)
+        print (out5.level_stream)
+        print (File1.level_stream)
+        print (File2.level_stream)
+        assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
 
 #         return self.test_dillable()
 
@@ -302,6 +335,10 @@ if __name__ == '__main__':
 #         del sys.argv[sys.argv.index('-1')]
 #         runner.run(testCase())
 #     else:
-    # unittest.main()
-    unittest.main(testRunner = debugTestRunner())
+    if "--debug" in sys.argv:
+        del sys.argv[sys.argv.index('--debug')]
+        unittest.main(testRunner = debugTestRunner())
+    else:
+        unittest.main()
+
 #     unittest.findTestCases(__main__).debug()
