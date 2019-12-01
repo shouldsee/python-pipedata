@@ -1,9 +1,5 @@
-# import pipedata
-# from pipedata.types import AutoNode as Node
-from pipedata.types import RawNode
-from pipedata.types import TrackedFile, InputTrackedFile,  TrackedFileNode,frame_init
+from pipedata.types import RawNode,TrackedFile, InputTrackedFile, frame_init
 import os
-import time
 
 symin, symout, index= frame_init()
 print ("[indexFile]",_indexFile)
@@ -15,10 +11,8 @@ print (_symbolicRootNode.input_kw)
 
 @RawNode.from_func({
     "OUT":TrackedFile("tests-out5.txt",),
-#     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def out5(  self, (numberFile, letterFile), 
-    # (dummyFile,),
     ):
     '''
     some doc
@@ -46,15 +40,12 @@ def out10(  self, (numberFile, letterFile), ):
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
     with open(self['OUT']().path,'w') as f:
-    # with self.output_kw['OUT'].open("w") as f:
         f.write( 10 * (number+letter)+'\n')
     return
 
 
-
 @RawNode.from_func({
     "OUT":TrackedFile("test-combined_short.txt"),
-#     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def make_combined_short( self, (out5, out15), ):
     lines = []
@@ -66,7 +57,6 @@ def make_combined_short( self, (out5, out15), ):
 
 @RawNode.from_func({
     "OUT":TrackedFile("tests-out15.txt"),
-#     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def out15(  self, (numberFile, letterFile), ):
     '''
