@@ -1,4 +1,4 @@
-from pipedata.base import index_file_read,index_file_update, cached_property,frame__default,_dict
+from pipedata.base import index_file_read, cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
 from pipedata.base import RawNode
 
@@ -68,7 +68,7 @@ class TrackedDict(RawNode):
         # if not file_not_empty(self.path):
         #     path.Path(self.path).dirname()
         #     os.path.makedirs_p()
-        index_file_update( 
+        self.index.index_file_update( 
             self.name, 
             dict(data = self.data),
             # self.path, 

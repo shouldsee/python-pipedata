@@ -23,7 +23,7 @@ import pipedata.base as pipedata
 # from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
 from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
-from pipedata.base import frame_init, IndexNode
+from pipedata.base import IndexNode
 
 import pipedata.types
 # import os as pip/e
@@ -314,7 +314,7 @@ rm tests-letter.txt
 #             print pipe._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read()    
         return dirname
     def test_level_stream(self):
-        from pipedata.types import TrackedFile, InputTrackedFile,  frame_init
+        from pipedata.types import TrackedFile, InputTrackedFile
         __file__ = 'test_temp.py'
         # frame_init()
 

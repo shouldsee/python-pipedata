@@ -1,4 +1,4 @@
-from pipedata.base import index_file_flush
+# from pipedata.base import index_file_flush
 
 import imp
 import os
@@ -23,5 +23,5 @@ def pipe_run(self):
     # print os.path.realpath( self._indexFile.path )
     # for x in  self._symbolicOutputNode.input_kw
     # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
-    index_file_flush(fname=self.path,)
+    self.index_file_flush()
     print('END' + 20*"-")

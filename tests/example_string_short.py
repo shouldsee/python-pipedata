@@ -1,4 +1,4 @@
-from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, IndexNode
+from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
 from pipedata.types import TrackedDict
 import os
 
@@ -9,8 +9,8 @@ print ("[indexFile]",index)
 
 # _f1 = InputTrackedFile('tests-number.txt',name='numberFile')
 # _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
-_f1 = TrackedFile(index, 'tests-number.txt',name='numberFile')
-_f2 = TrackedFile(index, 'tests-letter.txt',name='letterFile')
+_f1 = TrackedFile( index, 'tests-number.txt',name='numberFile')
+_f2 = TrackedFile( index, 'tests-letter.txt',name='letterFile')
 # _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
 print (index._symbolicRootNode.input_kw)
 

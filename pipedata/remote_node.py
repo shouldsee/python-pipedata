@@ -1,14 +1,15 @@
-from pipedata.base import index_file_read,index_file_update, cached_property,frame__default,_dict
+from pipedata.base import index_file_read, cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
 from pipedata.base import RawNode
 import path
 import imp
 class RemoteNode(RawNode):
     def __repr__(self,):
-        return '%s(name=%r,force=%r,)'%(self.__class__.__name__,self.name, self.force, )
+        return '%s(index=%r, name=%r,force=%r,)'%(self.__class__.__name__,
+            self.index,self.name, self.force, )
     def __call__(self):
         return self.called_value
-    def __init__(self, remote_path, remote_name, name = None, frame=None,force=0 ):
+    def __init__(self, index, remote_path, remote_name, name = None, frame=None,force=0 ):
         if name is None:
             name = remote_name
         assert remote_path.endswith(".py")
@@ -20,7 +21,7 @@ class RemoteNode(RawNode):
             if func is None:
                 func = lambda:None
             # output_kw = _dict(output_kw)
-            super( self.__class__, self).__init__(func, input_kw, output_kw, force, frame, skip, name, tag)
+            super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
         _f()
 
     # @cached_property
@@ -85,15 +86,15 @@ class RemoteNode(RawNode):
         print (self.indexFile.path)
         print (self.remote_node.indexFile.path)
 
-        index_file_update( 
-            self.indexFile.path, 
-            self.remote_node.index_update( self.remote_path / self.remote_node.indexFile),
+        return self.index.index_file_update( 
+            "%s:%s" % (self.remote_path, self.remote_name)
+            self.remote_node.index_update(),
             # index_file_read(self.remote_index_file,).get(self.remote_name)
             # dict(data = self.data),
             # self.path, 
             # dict(stat_result = stat_result)
         )
-        return 
+        # return 
         # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
         # if not file_not_empty(self.path):
         #     path.Path(self.path).dirname()

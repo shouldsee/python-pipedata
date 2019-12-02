@@ -109,40 +109,28 @@ class IndexNode(object):
         if path is None:
             path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
         self.path = path
-        # self.path = 
-        # vars(self)['_symbolicRootNode'] = SymbolicRootNode(
-        #     lambda self:[x() for x in self.input_kw.values()],
-        #     _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)        
-        # vars(self)['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
-        #     lambda self:[x() for x in self.input_kw.values()],
-        # _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
+        self.update_queue = _dict()
 
-        # vars(self)['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
-        # _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)        
-        return
+    def index_file_update(self, key, value):
+        self.update_queue[key] = value
+        return 
+    def index_file_flush(self, ):
+        return _index_file_flush(self.update_queue, self.path)
 
-
-def frame_init(frame=None):
+def _index_file_flush(update_queue, fname=None, frame=None):
     '''
-    Adding constants to this frame
+    Needs rewriting to prune unused keys
     '''
-    frame = frame__default(frame)
-    print ("[FRAME_INIT] _symbolicInputNode, _symbolicOutputNode")
-    indexFile = frame.f_locals['_indexFile'] = index_get_default(frame)
-    # indexFile = frame.f_locals['_indexFileNode'] = index_get_default(frame)
+    if fname is None:
+        fname = index_get_default(frame__default(frame)).path
 
-    frame.f_locals['_symbolicRootNode'] = rootNode = SymbolicRootNode(
-        lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)
+    with FileLock( fname +'.lock') as lock:
+        d = index_file_read(fname)
+        d.update( update_queue )
+        print("[FLUSHING_INDEX]",d.get('test_out5',None))
+        with open(fname,"wb") as f:
+            dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
 
-    frame.f_locals['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
-        lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
-
-    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
-        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)
-
-    return symin,symout,indexFile
 
 
 def st_time_size(st):
@@ -173,28 +161,8 @@ def index_file_read(fname,):
     return d
 
 
-update_queue = _dict()
-def index_file_update( key, value,):
-    update_queue[key] = value
-    return value
 
-def index_file_flush(fname=None, frame=None):
-    '''
-    Needs rewriting to prune unused keys
-    '''
-    if fname is None:
-        fname = index_get_default(frame__default(frame)).path
 
-    with FileLock( fname +'.lock') as lock:
-        d = index_file_read(fname)
-        d.update( update_queue )
-        print("[FLUSHING_INDEX]",d.get('test_out5',None))
-        with open(fname,"wb") as f:
-            dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
-
-# def code_index_update( fname, key)
-
-            # return f.read()
 
 
 class IndexedMissingFileError(Exception):
@@ -565,7 +533,7 @@ class RawNode(object):
 
     def _index_update(self):
         print ("[UPDATING_INDEX]%s"%self,)
-        return index_file_update( self.name, self.as_data())
+        return self.index.index_file_update( self.name, self.as_data())
         # return self._run_result
 
     def as_data(self):
@@ -674,7 +642,7 @@ class TrackedFile(RawNode):
         # if not file_not_empty(self.path):
         #     path.Path(self.path).dirname()
         #     os.path.makedirs_p()
-        return index_file_update( 
+        return self.index.index_file_update( 
             self.path, 
             dict(stat_result = stat_result)
         )
@@ -710,15 +678,7 @@ class TrackedFileNode(TrackedFile):
              # path.replace(),
             )
         self.node.path = path
-        # super( TrackedFileNode, self).__init__(path,frame=frame)
-        # super( TrackedFileNode, self).__init__(path)
 
-        # def index_update(self=self):
-        #     self.index_update()
-        #     self.node._index_update()
-        #     return 
-        #     # return self.index_update()
-        # self.node.index_update = index_update
 
     def get_node_name(self,name):
         return name

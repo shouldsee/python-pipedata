@@ -1,21 +1,20 @@
 import os,sys
 sys.path.insert(0, os.getcwd())
-from pipedata.types import RawNode,TrackedFile, InputTrackedFile, frame_init, Pipeline,TrackedDict,_dict, RemoteNode
-# sys.path.insert(0, os.getcwd()+"/..")
-symin, symout, index= frame_init()
-print ("[indexFile]",_indexFile.path)
+from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, IndexNode
+from pipedata.types import TrackedDict,RemoteNode
+import os
+index = IndexNode()
 # assert 0
 from pymisca.shell import shellexec as _shell
 
-_d = TrackedDict('meta', 
+_d = TrackedDict(index,'meta', 
     dict(DATA_ACC="ABC123"))
 
-RemoteNode(remote_path='test_build/pipe.py',remote_name='out5')
+RemoteNode(index,remote_path='test_build/pipe.py',remote_name='out5')
 
-@RawNode.from_func()
+@RawNode.from_func(index)
 def main(s,(out5,)):
     # out5.initialised
-
     # print (out5.remote_entity,)
     print ("[result]",out5(),out5())
     out5.index_update()
@@ -34,14 +33,12 @@ if 0:
         for k,v in paramDict.data:
             print(k,v)
 
-
     @RawNode.from_func()
     def bowtie2_align():
         _shell(["bowtie2",
             "-1",FASTQ_F1,
             "-2",FASTQ_F2])
         return 
-
 
     @RawNode.from_func()
     def macs_peak_calling():
