@@ -17,6 +17,7 @@ from filelock import FileLock
 _DEBUG = 1
 # import path as _path
 from path import Path
+import shutil
 # from _inspect_patch import inspect
 
 from pipedata._ast_util import ast_proj
@@ -89,8 +90,20 @@ def _open(*a):
 #         self.path=path
 #     def open(self,*a, **kw):
 #         return open(self.path,*a, **kw)
-    
-
+def _dbgf():        
+    import pdb,traceback
+    print(traceback.format_exc())
+    import traceback
+    traceback.print_stack()
+    traceback.print_exc()
+    pdb.set_trace()    
+def _dbgfs():        
+    import pdb,traceback
+    # print(traceback.format_exc())
+    # import traceback
+    # traceback.print_stack()
+    # traceback.print_exc()
+    pdb.set_trace()    
 class IndexNode(object):
 # class Pipeline(object):
     def __repr__(self):
@@ -109,8 +122,11 @@ class IndexNode(object):
         _dict(), _dict(),0,frame,1,'_symbolicInputNode',None,)  
         if path is None:
             path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
-        self.path = Path(path)
+        self.path = Path(path).realpath()
         self.update_queue = _dict()
+
+    def realpath(self):
+        return self.path
 
     def index_file_update(self, key, value):
         self.update_queue[key] = value
@@ -120,7 +136,7 @@ class IndexNode(object):
         with FileLock( fname +'.lock') as lock:
             d = self.records_cached.copy()
             d.update( self.update_queue )
-            print("[FLUSHING_INDEX]",d.get('test_out5',None))
+            print("[FLUSHING_INDEX]",self.path)
             with open(fname,"wb") as f:
                 dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
 
@@ -138,6 +154,36 @@ class IndexNode(object):
         return d        
     def get_record(self,key,default):
         return self.records_cached.get(key,default)
+
+    def make_copy(self, dest, name = None):
+
+        if dest is None:
+            dest = 'test_build'
+        
+        dest = Path(dest)
+        # shutil.rmtree(name)
+        # os.makedirs_p(dest)
+        # dest.makedirs_p()
+        assert dest.makedirs_p().isdir(),(dest,)
+
+        fn = self.path.replace('.index','')
+        fn = fn.replace('.pyc','.py')
+        fn = Path(fn)
+        # assert fn.endswith('.py'),fn
+        if name is None:
+            name = fn.basename()
+        assert name.endswith('.py') and fn.endswith('.py'),(fn,name)
+        shutil.copy2(fn, dest / name )
+        # if self.path.exists():
+        _dest = dest / name+'.index'
+        _dest.unlink_p()
+         # if _dest.exists() else None
+        
+        #     shutil.copy2( self.path, dest /  name+'.index')
+
+        
+        return dest
+
 
 
 def st_time_size(st):
@@ -267,20 +313,25 @@ class RawNode(object):
           - its code is changed 
           - its output is changed
         '''
-        print("CHECKING_NODE:%s"%self)        
+        print("CHECKING_NODE:%s,%s"%(self.index,self))        
+        if "out5" in self.name :
+            pass
+            # _dbgfs()
         if self.force:
-           print("CHANGED_FORCED:%s"%self)
+           print("CHANGED_FORCED:%s,%s"%(self.index,self))
            return 1
         if self._changed_code()[0]:
-            print( "CHANGED_CODE:%s"%self)
+            print( "CHANGED_CODE:%s,%s"%(self.index,self))
             return 1
+            
         if self._changed_output():
-            print( "CHANGED_OUTPUT:%s"%self)
+            assert 0,"This should be obsolete and never called" 
+            print( "CHANGED_OUTPUT:%s,%s"%(self.index,self))
             # print( "CHANGED_OUTPUT:%s\n%s"%(self,))
             print (self,self._changed_output())
             return 1
     
-        print("[CHANGED_SAME]:%s"%self)
+        print("[CHANGED_SAME]:%s,%s"%(self.index,self))
         return 0
 
 
@@ -299,11 +350,12 @@ class RawNode(object):
     def _changed_output(self):
         lst = []
         for k,v in self.output_kw.iteritems():
-            if isinstance(v,(TrackedFile,RawNode)):
+            if hasattr(v,'changed'):
+            # if isinstance(v,(TrackedFile,RawNode)):
                 if v.changed:
                     lst.append( (k,v) )
             else:
-                assert 0, (k,type(v),v)
+                assert 0, (k,hasattr(v,'changed'),getattr(v,'changed',None),type(v),v)
         return lst
 
     def _hook_indexed_diff_file(self):
@@ -319,8 +371,6 @@ class RawNode(object):
         self.force_index_update = 1
         return 0
 
-    def get_record(self):
-        return self.index.get_record( self.recordId, None)        
 
     def _changed_code(self):
         '''
@@ -341,6 +391,7 @@ class RawNode(object):
             states.append('TARGET_ABSENT')
 
         if index_absent:
+            # _dbgf()
             val = 1
             states.append("INDEX_ABSENT")
 
@@ -362,13 +413,7 @@ class RawNode(object):
                 v['func_ast_tree'] = _tree = ast_proj(src) ###  exclude from comparision
                 trees.append(_tree)
                 # print '\n'.join()
-            def _dbgf():        
-                import pdb,traceback
-                print(traceback.format_exc())
-                import traceback
-                traceback.print_stack()
-                traceback.print_exc()
-                pdb.set_trace()
+
 
             if 0:
                 if self.name =='out5':
@@ -515,8 +560,11 @@ class RawNode(object):
     def called_value(self,*a,**kw):
         # with self.index.path.dirname() as cwd:
         if self.changed_upstream:
-            [ x.called_value for x in self.input_kw.values() ]
-        if self.changed: 
+            for x in self.input_kw.values():
+                with x.index.realpath().dirname():
+                    x.called_value
+            # [ x.called_value for x in self.input_kw.values() ]
+        if any([self.changed_upstream,self.changed]): 
             print("RUNNING:%s"%self)
             input_kw, output_kw = self.initialised_tuples
             args = inspect.getargspec(self.func)[0]
@@ -539,11 +587,13 @@ class RawNode(object):
         self.committed = 1
         return self
 
+    def get_record(self):
+        return self.index.get_record( self.recordId, None)        
     @property
     def recordId(self):
         return self.name
     def _index_update(self):
-        print ("[UPDATING_INDEX]%s"%self,)
+        # print ("[UPDATING_INDEX]%s"%self,)
         return self.index.index_file_update( self.recordId, self.as_record())
     def index_update(self):
         val = self._index_update()
@@ -598,12 +648,13 @@ class TrackedFile(RawNode):
 
     def _hook_indexed_missing_file(self):
         if "indexed_missing_file" in self.HOOKS_ENABLED_LIST:
+            pass
             ### when file is indexed but absent
-            raise IndexedMissingFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
+        raise IndexedMissingFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
 
     def _hook_indexed_diff_file(self):
-        if "indexed_diff_file" in self.HOOKS_ENABLED_LIST:
-            raise IndexedDiffFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
+        # if "indexed_diff_file" in self.HOOKS_ENABLED_LIST:
+        raise IndexedDiffFileError(os.getcwd()+'|'+str(self)+str(self.indexFile))
 
     @cached_property
     def changed(self):
@@ -661,7 +712,7 @@ class TrackedFile(RawNode):
             # return (0,"SAME")
     def as_record(self, ):
         stat_result =os.stat(self.realpath())
-        print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
+        # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime,))
         return dict(stat_result = stat_result)
 
     # def index_update(self,):

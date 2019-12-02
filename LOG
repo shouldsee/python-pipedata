@@ -1,0 +1,777 @@
+[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+.[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299486.92
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299486.92
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299486.92
+('[UPDATING_INDEX]<Node with func:out5>',)
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299486.93
+('[UPDATING_INDEX]<Node with func:out10>',)
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+('[UPDATING_INDEX]<Node with func:out15>',)
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299486.93
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299486.93
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299486.93
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299486.94
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299486.94
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299486.94
+('[UPDATING_INDEX]<Node with func:out5>',)
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299486.94
+('[UPDATING_INDEX]<Node with func:out10>',)
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299486.94
+('[UPDATING_INDEX]<Node with func:out15>',)
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299486.95
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299486.95
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node wit.[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+h func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+[CHANGED_SAME]:<Node with func:out5>
+CHECKING_NODE:<Node with func:out10>
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+[CHANGED_SAME]:<Node with func:out5>
+CHECKING_NODE:<Node with func:out10>
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299486.98
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299486.98
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+('[UPDATING_INDEX]<Node with func:out5>',)
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299486.98
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+('[UPDATING_INDEX]<Node with func:out10>',)
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299486.99
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+('[UPDATING_INDEX]<Node with func:out15>',)
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299486.99
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:[CMD]
+rm tests-out5.txt             
+
+[CMD]
+rm tests-letter.txt             
+
+[<Node with func:_symbolicOutputNode>, True, []]
+[<Node with func:_symbolicInputNode>, False, []]
+[InputTrackedFile('tests-number.txt'), 0, []]
+[InputTrackedFile('tests-letter.txt'), 1, []]
+[TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],), 0, []]
+[TrackedFile('tests-combined.txt'), 0, []]
+[<Node with func:out5>, True, [InputTrackedFile('tests-letter.txt')]]
+[<Node with func:out10>, False, [InputTrackedFile('tests-letter.txt')]]
+[<Node with func:make_combined_short>, False, [<Node with func:out5>, <Node with func:out15>]]
+[<Node with func:out15>, False, [InputTrackedFile('tests-letter.txt')]]
+[<Node with func:make_combined>, False, [<Node with func:out5>, <Node with func:out10>, <Node with func:out15>]]
+.[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299486.99
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299486.99
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+CHANGED_OUTPUT:<Node with func:out5>
+(<Node with func:out5>, [('OUT', TrackedFile('tests-out5.txt'))])
+CHECKING_NODE:<Node with func:out10>
+[CHANGED_SAME]:<Node with func:out10>
+CHECKING_NODE:<Node with func:make_combined_short>
+[CHANGED_SAME]:<Node with func:make_combined_short>
+CHECKING_NODE:<Node with func:out15>
+[CHANGED_SAME]:<Node with func:out15>
+CHECKING_NODE:<Node with func:make_combined>
+[CHANGED_SAME]:<Node with func:make_combined>
+[<Node with func:_symbolicOutputNode>, True, []]
+[<Node with func:_symbolicInputNode>, False, []]
+[InputTrackedFile('tests-number.txt'), 0, []]
+[InputTrackedFile('tests-letter.txt'), 0, []]
+[TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],), 0, []]
+[TrackedFile('tests-combined.txt'), 0, []]
+[<Node with func:out5>, True, []]
+[<Node with func:out10>, False, []]
+[<Node with func:make_combined_short>, False, [<Node with func:out5>]]
+[<Node with func:out15>, False, []]
+[<Node with func:make_combined>, False, [<Node with func:out5>]]
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+CHANGED_OUTPUT:<Node with func:out5>
+(<Node with func:out5>, [('OUT', TrackedFile('tests-out5.txt'))])
+CHECKING_NODE:<Node with func:out10>
+[CHANGED_SAME]:<Node with func:out10>
+CHECKING_NODE:<Node with func:make_combined_short>
+[CHANGED_SAME]:<Node with func:make_combined_short>
+CHECKING_NODE:<Node with func:out15>
+[CHANGED_SAME]:<Node with func:out15>
+CHECKING_NODE:<Node with func:make_combined>
+[CHANGED_SAME]:<Node with func:make_combined>
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299487.04
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299487.04
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+('[UPDATING_INDEX]<Node with func:out5>',)
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299487.04
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299487.04
+('[UPDATING_INDEX]<Node with func:out10>',)
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+('[UPDATING_INDEX]<Node with func:out15>',)
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299487.04
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299487.05
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299487.05
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+[CHANGED_SAME]:<Node with func:out5>
+CHECKING_NODE:<Node with func:out10>
+[CHANGED_SAME]:<Node with func:out10>
+CHECKING_NODE:<Node with func:out15>
+[CHANGED_SAME]:<Node with func:out15>
+CHECKING_NODE:<Node with func:make_combined_short>
+[CHANGED_SAME]:<Node with func:make_combined_short>
+CHECKING_NODE:<Node with func:make_combined>
+[CHANGED_SAME]:<Node with func:ma...[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+ke_combined>
+('[FLUSHING_INDEX]', None)
+END--------------------
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+[Dillable]
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299487.08
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299487.08
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299487.09
+('[UPDATING_INDEX]<Node with func:out5>',)
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+('[UPDATING_INDEX]<Node with func:out10>',)
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299487.09
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299487.09
+('[UPDATING_INDEX]<Node with func:out15>',)
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299487.09
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSE[CMD]
+touch tests-out5.txt
+
+[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+NT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299487.09
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299487.11
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299487.11
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+('[UPDATING_INDEX]<Node with func:out5>',)
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299487.12
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+('[UPDATING_INDEX]<Node with func:out10>',)
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299487.12
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+('[UPDATING_INDEX]<Node with func:out15>',)
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299487.12
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_shor[CMD]
+echo 123> tests-out10.txt
+
+.[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+t>
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299487.12
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299487.12
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+[CHANGED_SAME]:<Node with func:out5>
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299487.14
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299487.14
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299487.15
+('[UPDATING_INDEX]<Node with func:out5>',)
+CHECKING_NODE:<Node with func:out10>
+(<Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+('[UPDATING_INDEX]<Node with func:out10>',)
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299487.15
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+("[U[CMD]
+rm tests-out5.txt             
+
+.E.[CMD]
+    echo "1"> tests-number.txt; 
+    echo a>tests-letter.txt; 
+            
+PDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299487.15
+('[UPDATING_INDEX]<Node with func:out15>',)
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299487.15
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299487.15
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=0.state=['SAME']
+CHECKING_NODE:<Node with func:out5>
+TrackedDict(index=IndexNode(path='__test__.py.index'), name='test',force=0,data=[('JOB_INDEX', 123)],)
+('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+(<Node with func:_symbolicInputNode>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:_symbolicInputNode>
+RUNNING:<Node with func:_symbolicInputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicInputNode>',)
+[CheckingChange]:OrderedDict([('a', 1), ('I am in the original script', 2)]).changed=1.state=['INDEX_ABSENT']
+RUNNING:InputTrackedFile('tests-number.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-number.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-number.txt')
+1575299487.18
+RUNNING:InputTrackedFile('tests-letter.txt')
+("[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')",)
+[UPDATING_INDEX]InputTrackedFile('tests-letter.txt')
+1575299487.18
+RUNNING:TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)
+("[UPDATING_INDEX]TrackedDict(index=IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'), name='paramDict',force=0,data=[('a', 1), ('I am in the original script', 2)],)",)
+CHECKING_NODE:<Node with func:out5>
+(<Node with func:out5>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out5>
+RUNNING:<Node with func:out5>
+(<class 'pipedata.base.InputTrackedFile'>, <class 'pipedata.base.InputTrackedFile'>)
+()
+('[UPDATING_INDEX]<Node with func:out5>',)
+("[UPDATING_INDEX]TrackedFile('tests-out5.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out5.txt')
+1575299487.18
+CHECKING_NODE:<Node with func:out10>
+(<.
+======================================================================
+ERROR: test_level_stream (__main__.Case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_all.py", line 323, in test_level_stream
+    out5 = InputTrackedFile(index,"a.txt",)
+  File "/work/repos/pipedata/pipedata/base.py", line 593, in __init__
+    super( TrackedFile,self).__init__(index, func,  input_kw, output_kw, force, frame, skip, name, tag)
+TypeError: super(type, obj): obj must be an instance or subtype of type
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.279s
+
+FAILED (errors=1)
+Node with func:out10>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out10>
+RUNNING:<Node with func:out10>
+("[UPDATING_INDEX]TrackedFile('tests-out10.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out10.txt')
+1575299487.18
+('[UPDATING_INDEX]<Node with func:out10>',)
+CHECKING_NODE:<Node with func:out15>
+(<Node with func:out15>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:out15>
+RUNNING:<Node with func:out15>
+("[UPDATING_INDEX]TrackedFile('tests-out15.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-out15.txt')
+1575299487.18
+('[UPDATING_INDEX]<Node with func:out15>',)
+CHECKING_NODE:<Node with func:make_combined_short>
+(<Node with func:make_combined_short>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined_short>
+RUNNING:<Node with func:make_combined_short>
+("[UPDATING_INDEX]TrackedFile('test-combined_short.txt')",)
+[UPDATING_INDEX]TrackedFile('test-combined_short.txt')
+1575299487.18
+('[UPDATING_INDEX]<Node with func:make_combined_short>',)
+CHECKING_NODE:<Node with func:make_combined>
+(<Node with func:make_combined>, 1, ['INDEX_ABSENT'])
+CHANGED_CODE:<Node with func:make_combined>
+RUNNING:<Node with func:make_combined>
+('[UPDATING_INDEX]<Node with func:make_combined>',)
+("[UPDATING_INDEX]TrackedFile('tests-combined.txt')",)
+[UPDATING_INDEX]TrackedFile('tests-combined.txt')
+1575299487.18
+('[FLUSHING_INDEX]', None)
+END--------------------
+1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a
+1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
+
+('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/pipe.py.index'))
+OrderedDict([('_symbolicOutputNode', <Node with func:_symbolicOutputNode>), ('_symbolicInputNode', <Node with func:_symbolicInputNode>), ('numberFile', InputTrackedFile('tests-number.txt')), ('letterFile', InputTrackedFile('tests-letter.txt'))])
+START--------------------
+RUNNING:<Node with func:_symbolicOutputNode>
+('[UPDATING_INDEX]<Node with func:_symbolicOutputNode>',)
+CHECKING_NODE:<Node with func:_symbolicInputNode>
+[CHANGED_SAME]:<Node with func:_symbolicInputNode>
+[('a', 1, 1), ('I am in the original script', 2, 'why am i here?')]

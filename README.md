@@ -28,9 +28,9 @@ python2 test.py
 
 1. ~~rename pipedata.py to types.py~~
 
-1. careful with inspect.getsource
+1. (Tip) careful with inspect.getsource
 
-1. _skip python3 for now_ Python3 OrderedDict is wicked...
+1. _skip for now_  ~~python3 for now_ Python3 OrderedDict is wicked...~~
 ```
   File "/usr/lib/python3.6/pickle.py", line 496, in save
     rv = reduce(self.proto)
@@ -39,7 +39,7 @@ TypeError: can't pickle odict_keys objects
 
 1. _See TrackedDict_ ~~Add a variableNode~~
 
-1. figure out whether to use absolute or relative path 
+1. (Complicated) figure out whether to use absolute or relative path 
   - pipedata.base.TrackedFile() use realpath() for caching
 
 1. (Delayed) Go fully atomic by backing up old file 

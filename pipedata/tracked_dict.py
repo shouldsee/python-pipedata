@@ -63,17 +63,3 @@ class TrackedDict(RawNode):
         return val
     def as_record(self):
         return dict(data = self.data)
-
-    # def _index_update(self,):
-
-    #     # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
-    #     # if not file_not_empty(self.path):
-    #     #     path.Path(self.path).dirname()
-    #     #     os.path.makedirs_p()
-    #     self.index.index_file_update( 
-    #         self.name, 
-    #         dict(data = self.data),
-    #         # self.path, 
-    #         # dict(stat_result = stat_result)
-    #     )
-    #     return 
