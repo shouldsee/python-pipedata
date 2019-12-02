@@ -9,8 +9,8 @@ print ("[indexFile]",index)
 
 # _f1 = InputTrackedFile('tests-number.txt',name='numberFile')
 # _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
-_f1 = TrackedFile( index, 'tests-number.txt',name='numberFile')
-_f2 = TrackedFile( index, 'tests-letter.txt',name='letterFile')
+_f1 = InputTrackedFile( index, 'tests-number.txt',name='numberFile')
+_f2 = InputTrackedFile( index, 'tests-letter.txt',name='letterFile')
 # _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
 print (index._symbolicRootNode.input_kw)
 

@@ -25,6 +25,8 @@ from pipedata.types import TrackedDict
 from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 from pipedata.base import IndexNode
 
+from pipedata.types import TrackedFile, InputTrackedFile
+
 import pipedata.types
 # import os as pip/e
 def _shell(cmd,shell=True):
@@ -315,14 +317,15 @@ rm tests-letter.txt
 #             print pipe._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read()    
         return dirname
     def test_level_stream(self):
+        import pipedata.types
+        reload(pipedata.types)
         from pipedata.types import TrackedFile, InputTrackedFile
-        __file__ = 'test_temp.py'
+        # __file__ = 'test_temp.py'
         # frame_init()
-
         index = IndexNode('__temp.py.index')
-        out5 = InputTrackedFile(index,"a.txt",input_func=lambda self,:None).node
-        File1 = InputTrackedFile(index,"tests-out5.txt",input_func=lambda self,(out5,):None).node
-        File2 = InputTrackedFile(index, "tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        out5 = InputTrackedFile(index,"a.txt","tt1")
+        File1 = InputTrackedFile(index,"tests-out5.txt","tt2")
+        File2 = InputTrackedFile(index, "tests-outxx.txt","tt3")
         out5.merge(File1)
         out5.merge(File2)
         # File2.merge(out5)
@@ -331,9 +334,10 @@ rm tests-letter.txt
         print (File2.level_stream)
         assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
 
-        out5 = InputTrackedFile(index, "a.txt",input_func=lambda self,:None).node
-        File1 = InputTrackedFile(index, "tests-out5.txt",input_func=lambda self,(out5,):None).node
-        File2 = InputTrackedFile(index, "tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        out5 = InputTrackedFile(index,"a.txt","t1")
+        File1 = InputTrackedFile(index,"tests-out5.txt","t2")
+        File2 = InputTrackedFile(index, "tests-outxx.txt","t3")
+
         out5.merge(File1)
         # out5.merge(File2)
         File2.merge(out5)

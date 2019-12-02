@@ -23,20 +23,17 @@ class RemoteNode(RawNode):
         def _f(output_kw={}, func = None, input_kw={},skip=1, tag=None, ):
             if func is None:
                 func = lambda:None
+            def func(self, (remote_node,),):
+                _ = '''
+                ### should modify remote leaves records to include self
+                '''
+                self.output_kw = self.remote_node().output_kw
+                # remote_node()
+                return remote_node.returned                
             # output_kw = _dict(output_kw)
             super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
         _f()
 
-        # def _f(func = None,output_kw={},  input_kw={},skip=1, tag=None, ):
-        #     def func(self, (remote_node,),):
-        #         # with self.remote_path.dirname():
-        #         remote_node()
-        #         return remote_node.returned
-        #     if func is None:
-        #         func = lambda:None
-        #     # output_kw = _dict(output_kw)
-        #     super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
-        # _f()
     def _init_func(self, d=None, skip =1):
         return (dict(remote_node= self.remote_node),_dict())
 
@@ -115,43 +112,7 @@ class RemoteNode(RawNode):
         return val
 
     def as_record(self):
-        return _dict(
-            remote_path = self.remote_path,
-            remote_name = self.remote_name,
-            remote_record=self.remote_node.as_record())
-
-
-    # def index_update(self):
-    #     pass
-    # def _index_update(self, ):
-    #     assert 0, "see self.remote_node._hook_post_index_update"
-
-    # @cached_property
-    # def called_value(self,*a,**kw):
-    #     print("RUNNING:%s"%self)
-    #     if self.changed: 
-    #         print("RUNNING:%s"%self)
-    #         with path.Path(self.remote_path).dirname():
-    #             self.remote_node.called_value        
-    #         self.runned = 1
-    #     else:
-    #         self.runned = 0
-    #     if self.remote_node.index_updated or self.force_index_update:
-    #         _ = '''
-    #         Once running is complete, trigger an update t o index file
-    #         '''
-    #         [x.index_update() for x in self.level_stream]
-    #         self.index_updated = 1
-    #     else:
-    #         self.index_updated = 0
-    #         pass
-    #         # [x.index_update() for x in self.output_kw.values()]
-    #     # self.runned = runned
-    #     self.committed = 1
-    #     return self
-
-
-    # @cached_property
-    # def called_value(self,*a,**kw):
-    #     with path.Path(self.remote_path).dirname():
-    #         return self.remote_node.called_value
+        return _dict([
+            ("remote_path" , self.remote_path),
+            ("remote_name" , self.remote_name),
+            ("remote_record",self.remote_node.as_record())])

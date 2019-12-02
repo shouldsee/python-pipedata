@@ -586,12 +586,14 @@ class TrackedFile(RawNode):
     def __call__(self,*a,**kw):
         return self
 
-    def __init__(self, index, path,  func = None, input_kw={},output_kw={},force=0, frame=None,skip=1,name=None,tag=None):
+    def __init__(self, index, path,  name=None, func = None, input_kw={},output_kw={},force=0, frame=None,skip=1,tag=None):
         if func is None:
             func = lambda:None
         frame = frame__default(frame)
-        super( TrackedFile,self).__init__(index, func,  input_kw, output_kw, force, frame, skip, name, tag)
+        super( TrackedFile, self).__init__(index, func,  input_kw, output_kw, force, frame, skip, name, tag)
         self.path=path
+    def realpath(self):
+        return self.index.path.dirname()/self.path
 
 
     def _hook_indexed_missing_file(self):
@@ -622,43 +624,43 @@ class TrackedFile(RawNode):
         if self.DEBUG_NO_CACHE:
             return 1
         rec = self.get_record()
-        with self.index.path.dirname() as cwd:
+        # with self.index.path.dirname() as cwd:
 
-            # file_absent = os_stat_safe(self.path) == os_stat_result_null
-            file_absent = not file_not_empty(self.path)
-            index_absent = rec is None
+        # file_absent = os_stat_safe(self.path) == os_stat_result_null
+        file_absent = not file_not_empty(self.realpath())
+        index_absent = rec is None
 
-            states = [] 
-            if file_absent:
-                val = 1
-                states.append('TARGET_ABSENT')
+        states = [] 
+        if file_absent:
+            val = 1
+            states.append('TARGET_ABSENT')
 
-            if index_absent:
-                val = 1
-                states.append("INDEX_ABSENT")
+        if index_absent:
+            val = 1
+            states.append("INDEX_ABSENT")
 
-            if file_absent and not index_absent:
+        if file_absent and not index_absent:
 
-                self._hook_indexed_missing_file()
+            self._hook_indexed_missing_file()
 
-            if not (file_absent or index_absent):
-                v1 = st_time_size( rec['stat_result'])
-                v2 = st_time_size( os_stat_safe(self.path) )
-                if  v1!= v2:
-                    if self.VERBOSE:
-                        print (self.path, zip(v1,v2))
-                    val=1; states.append("DIFF")
-                    self._hook_indexed_diff_file()
-                else:
-                    val=0; states.append("SAME")
+        if not (file_absent or index_absent):
+            v1 = st_time_size( rec['stat_result'])
+            v2 = st_time_size( os_stat_safe(self.realpath()) )
+            if  v1!= v2:
+                if self.VERBOSE:
+                    print (self.realpath(), zip(v1,v2))
+                val=1; states.append("DIFF")
+                self._hook_indexed_diff_file()
+            else:
+                val=0; states.append("SAME")
 
-            if self.VERBOSE:
-                print("[CheckingChange]:{self.path}.changed={val}.state={states}".format(**locals()))
-            return val
+        if self.VERBOSE:
+            print("[CheckingChange]:{self.path}.changed={val}.state={states}".format(**locals()))
+        return val
             # ,states
             # return (0,"SAME")
     def as_record(self, ):
-        stat_result =os.stat(self.path)
+        stat_result =os.stat(self.realpath())
         print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
         return dict(stat_result = stat_result)
 
@@ -686,52 +688,55 @@ class TrackedFile(RawNode):
 
 class TrackedFileNode(TrackedFile):
     pass
-    def __init__(self,  index,  path,  input_func=None, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
-        if nodeClass is None:
-            nodeClass = AutoNode
-        frame = frame__default(frame)
-        # import traceback
-        # traceback.print_stack()
-        # print self.get_node_name(name)
-        if input_func is None:
-            input_func = lambda self, (_symbolicInputNode,):None
-        self.node = nodeClass(
-            index,
-            input_func, 
-            input_kw = _dict(), output_kw= _dict(), force=force,
-            frame = frame, skip=skip,
-            name = self.get_node_name(name),
-            tag = path,
-             # path.replace(),
-            )
-        self.node.path = path
+    # def __init__(self,  index,  path,  input_func=None, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
+    #     if nodeClass is None:
+    #         nodeClass = AutoNode
+    #     frame = frame__default(frame)
+    #     # import traceback
+    #     # traceback.print_stack()
+    #     # print self.get_node_name(name)
+    #     if input_func is None:
+    #         input_func = lambda self, (_symbolicInputNode,):None
+    #     self.node = nodeClass(
+    #         index,
+    #         input_func, 
+    #         input_kw = _dict(), output_kw= _dict(), force=force,
+    #         frame = frame, skip=skip,
+    #         name = self.get_node_name(name),
+    #         tag = path,
+    #          # path.replace(),
+    #         )
+    #     self.node.path = path
 
 
-    def get_node_name(self,name):
-        return name
+    # def get_node_name(self,name):
+    #     return name
 
 
-    @property
-    def changed_upstream(self):
-        return self.node.changed_upstream
+    # @property
+    # def changed_upstream(self):
+    #     return self.node.changed_upstream
 
-    def __call__(self):
-        return self.called_value
+    # def __call__(self):
+    #     return self.called_value
 
-    @property
-    def called_value(self):
-        return self
-        # return self.node.called_value
+    # @property
+    # def called_value(self):
+    #     return self
+    #     # return self.node.called_value
 
-# class OutputTrackedFile(TrackedFileNode):
-#     def 
 
-class InputTrackedFile(TrackedFileNode):
+class InputTrackedFile(TrackedFile):
     '''
     '''
     # counter = _counter
     default_name_fmt =  "InputFileNode_%s"
     counter = -1
+    def __init__(self,*a,**kw):
+        pass
+        # TrackedFile.__init__(self,*a,**kw)
+        super( InputTrackedFile,self).__init__(*a,**kw)        
+
     def get_node_name(self, name):
         if name is None:
             self.__class__.counter += 1

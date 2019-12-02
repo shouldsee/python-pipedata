@@ -17,7 +17,8 @@ def main(s,(out5,)):
     # out5.initialised
     # print (out5.remote_entity,)
     print ("[result]",out5(),out5())
-    out5.index_update()
+    print(open(out5()['OUT'].realpath(),"r").read())
+    # out5.index_update()
 
 main()
 
