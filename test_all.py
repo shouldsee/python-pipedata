@@ -82,6 +82,7 @@ class Case(unittest.TestCase):
         index = IndexNode(path='__test__.py.index')
         v = TrackedDict( index, 'test',dict(JOB_INDEX=123,))        
         s = repr(v)
+        print(s)
         vnew = eval(s)
         assert vnew.data == v.data,(s,v,vnew)
         

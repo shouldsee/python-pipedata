@@ -1,4 +1,4 @@
-from pipedata.base import index_file_read, cached_property,frame__default,_dict
+from pipedata.base import cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
 from pipedata.base import RawNode
 import path
@@ -17,12 +17,28 @@ class RemoteNode(RawNode):
         self.remote_path = path.Path(remote_path).realpath()
     # def __init__(self, name, data, frame=None, force = 0):
         frame = frame__default(frame)
+
+        # input_kw = 
+
         def _f(output_kw={}, func = None, input_kw={},skip=1, tag=None, ):
             if func is None:
                 func = lambda:None
             # output_kw = _dict(output_kw)
             super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
         _f()
+
+        # def _f(func = None,output_kw={},  input_kw={},skip=1, tag=None, ):
+        #     def func(self, (remote_node,),):
+        #         # with self.remote_path.dirname():
+        #         remote_node()
+        #         return remote_node.returned
+        #     if func is None:
+        #         func = lambda:None
+        #     # output_kw = _dict(output_kw)
+        #     super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
+        # _f()
+    def _init_func(self, d=None, skip =1):
+        return (dict(remote_node= self.remote_node),_dict())
 
     # @cached_property
     @property
@@ -34,21 +50,27 @@ class RemoteNode(RawNode):
         # mod = imp.load_source( self.remote_path.replace(), self.remote_path)
         mod = imp.load_source( "remote_pipe", self.remote_path)
         node = getattr(mod, self.remote_name)
+        # def _hook_post_index_update(remote, indexData):
+        #     return self.index.index_file_update( 
+        #     "%s:%s" % (self.remote_path, self.remote_name),
+        #     indexData[1])
+        # node._hook_post_index_update = _hook_post_index_update
         return node
-    # def input_kw
 
     def _hook_indexed_diff_file(self):
+        # self.force_index_update = 1
+        # return 
         raise IndexedDiffFileError(self)
-        # return 1
 
     def _hook_indexed_missing_file(self):
         return 1
 
     @cached_property
     def changed(self):
-        return 0
-        # return self._changed
+        # return 1
+        return self._changed
         
+
     @cached_property
     def _changed(self, ):
         '''
@@ -57,52 +79,79 @@ class RemoteNode(RawNode):
             - if the file is not indexed
             - if mtime or size is different
         '''
-        rec = index_file_read( self.indexFile.path, ).get( self.name, None)
-        file_absent = index_file_read( self.remote_index_file)
+        if self.changed_upstream:
+            return 1
+        else:
+            recOld = self.get_record()
+            recNew = self.as_record()
+        # file_absent = index_file_read( self.remote_index_file )
         # file_absent = os_stat_safe(self.path) == os_stat_result_null
-        # file_absent = False
-        index_absent = rec is None
+
+        file_absent = recNew is None
+        index_absent = recOld is None
         states = [] 
+
+        if file_absent:
+            assert 0,"Impossible"
+            states.append('TARGET_ABSENT')
+            if not index_absent:
+                self._hook_indexed_missing_file()
 
         if index_absent:
             val = 1
             states.append("INDEX_ABSENT")
-        else:
-            vold = rec['data']
-            vnew = self.data
-            if vold != vnew:
+
+        if not (file_absent or index_absent):
+            if  recNew!= recOld:
                 if self.VERBOSE:
-                    print (zip(vold.keys(),vold.values(),vnew.values()))
+                    print (self.path, zip(recNew.keys(),recNew.values(),recOld.values()))
                 val=1; states.append("DIFF")
                 self._hook_indexed_diff_file()
             else:
                 val=0; states.append("SAME")
 
         if self.VERBOSE:
-            print("[CheckingChange]:{self.data}.changed={val}.state={states}".format(**locals()))
+            print("[CheckingChange]:{self.recordId}.changed={val}.state={states}".format(**locals()))
         return val
 
-    def index_update(self,):
-        print (self.indexFile.path)
-        print (self.remote_node.indexFile.path)
+    def as_record(self):
+        return _dict(
+            remote_path = self.remote_path,
+            remote_name = self.remote_name,
+            remote_record=self.remote_node.as_record())
 
-        return self.index.index_file_update( 
-            "%s:%s" % (self.remote_path, self.remote_name)
-            self.remote_node.index_update(),
-            # index_file_read(self.remote_index_file,).get(self.remote_name)
-            # dict(data = self.data),
-            # self.path, 
-            # dict(stat_result = stat_result)
-        )
-        # return 
-        # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
-        # if not file_not_empty(self.path):
-        #     path.Path(self.path).dirname()
-        #     os.path.makedirs_p()
 
-        # return 
+    # def index_update(self):
+    #     pass
+    # def _index_update(self, ):
+    #     assert 0, "see self.remote_node._hook_post_index_update"
 
-    @cached_property
-    def called_value(self,*a,**kw):
-        with path.Path(self.remote_path).dirname():
-            return self.remote_node.called_value
+    # @cached_property
+    # def called_value(self,*a,**kw):
+    #     print("RUNNING:%s"%self)
+    #     if self.changed: 
+    #         print("RUNNING:%s"%self)
+    #         with path.Path(self.remote_path).dirname():
+    #             self.remote_node.called_value        
+    #         self.runned = 1
+    #     else:
+    #         self.runned = 0
+    #     if self.remote_node.index_updated or self.force_index_update:
+    #         _ = '''
+    #         Once running is complete, trigger an update t o index file
+    #         '''
+    #         [x.index_update() for x in self.level_stream]
+    #         self.index_updated = 1
+    #     else:
+    #         self.index_updated = 0
+    #         pass
+    #         # [x.index_update() for x in self.output_kw.values()]
+    #     # self.runned = runned
+    #     self.committed = 1
+    #     return self
+
+
+    # @cached_property
+    # def called_value(self,*a,**kw):
+    #     with path.Path(self.remote_path).dirname():
+    #         return self.remote_node.called_value

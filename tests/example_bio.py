@@ -1,6 +1,6 @@
 import os,sys
 sys.path.insert(0, os.getcwd())
-from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, IndexNode
+from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
 from pipedata.types import TrackedDict,RemoteNode
 import os
 index = IndexNode()
@@ -19,8 +19,8 @@ def main(s,(out5,)):
     print ("[result]",out5(),out5())
     out5.index_update()
 
-
 main()
+
 if 0:
     _ = '''
     Connect to upstream and relay calling
@@ -46,15 +46,17 @@ if 0:
         return 
 
 if __name__ == '__main__':
-    from pipedata.base import index_file_flush
+    # from pipedata.base import index_file_flush
 
     TrackedFile.VERBOSE=0
     print('START' + 20*"-")
-    symout()
-    print(symout())
+    # symout()
+    # print(symout())
     # .input_kw['make_combined']['OUT'].open('r').read())
-    index_file_flush()
+    index.index_file_flush()
     print('END' + 20*"-")
     
     import dill
-    dill.dumps(symout)
+    import json
+    print json.dumps(dill.load(open(index.path)),indent=4)
+    # dill.dumps(symout)

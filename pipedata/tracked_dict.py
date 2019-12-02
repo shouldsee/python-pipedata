@@ -1,10 +1,10 @@
-from pipedata.base import index_file_read, cached_property,frame__default,_dict
+from pipedata.base import cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
 from pipedata.base import RawNode
 
 class TrackedDict(RawNode):
     def __repr__(self,):
-        return 'TrackedDict(index=%r, name=%r,force=%r,data=%r,)'%(self.index, self.name, self.force, self.data.items())
+        return 'TrackedDict(index=%s, name=%r,force=%r,data=%r,)'%(self.index, self.name, self.force, self.data.items())
 
     def __call__(self,*a,**kw):
         return self
@@ -38,7 +38,7 @@ class TrackedDict(RawNode):
             - if the file is not indexed
             - if mtime or size is different
         '''
-        rec = index_file_read( self.indexFile.path, ).get( self.name, None)
+        rec = self.get_record()
         # file_absent = os_stat_safe(self.path) == os_stat_result_null
         file_absent = False
         index_absent = rec is None
@@ -61,17 +61,19 @@ class TrackedDict(RawNode):
         if self.VERBOSE:
             print("[CheckingChange]:{self.data}.changed={val}.state={states}".format(**locals()))
         return val
+    def as_record(self):
+        return dict(data = self.data)
 
-    def index_update(self,):
+    # def _index_update(self,):
 
-        # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
-        # if not file_not_empty(self.path):
-        #     path.Path(self.path).dirname()
-        #     os.path.makedirs_p()
-        self.index.index_file_update( 
-            self.name, 
-            dict(data = self.data),
-            # self.path, 
-            # dict(stat_result = stat_result)
-        )
-        return 
+    #     # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
+    #     # if not file_not_empty(self.path):
+    #     #     path.Path(self.path).dirname()
+    #     #     os.path.makedirs_p()
+    #     self.index.index_file_update( 
+    #         self.name, 
+    #         dict(data = self.data),
+    #         # self.path, 
+    #         # dict(stat_result = stat_result)
+    #     )
+    #     return 
