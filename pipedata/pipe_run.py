@@ -17,10 +17,11 @@ def pipe_run(self):
     print('START' + 20*"-")
     # nodes = [self._symbolicOutputNode.input_kw]
     # self._symbolicOutputNode()
+    # vars(self)
     [x() for x in self._symbolicRootNode.input_kw.values()]
     # assert 0,self._symbolicRootNode.input_kw
     # print os.path.realpath( self._indexFile.path )
     # for x in  self._symbolicOutputNode.input_kw
     # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
-    index_file_flush(fname=self._indexFile.path,)
+    index_file_flush(fname=self.path,)
     print('END' + 20*"-")

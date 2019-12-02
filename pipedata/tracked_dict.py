@@ -4,19 +4,19 @@ from pipedata.base import RawNode
 
 class TrackedDict(RawNode):
     def __repr__(self,):
-        return 'TrackedDict(name=%r,force=%r,data=%r,)'%(self.name, self.force, self.data.items())
+        return 'TrackedDict(index=%r, name=%r,force=%r,data=%r,)'%(self.index, self.name, self.force, self.data.items())
 
     def __call__(self,*a,**kw):
         return self
 
-    def __init__(self, name, data, frame=None, force = 0):
+    def __init__(self, index, name, data, frame=None, force = 0):
         self.data = _dict(data)
         frame = frame__default(frame)
         def _f(output_kw={}, func = None, input_kw={},skip=1, tag=None, ):
             if func is None:
                 func = lambda:None
             # output_kw = _dict(output_kw)
-            super( self.__class__, self).__init__(func, input_kw, output_kw, force, frame, skip, name, tag)
+            super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
         _f()
 
     def _hook_indexed_diff_file(self):

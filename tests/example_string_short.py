@@ -1,19 +1,24 @@
-from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, Pipeline
+from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, IndexNode
 from pipedata.types import TrackedDict
 import os
 
-symin, symout, index= frame_init()
-print ("[indexFile]",_indexFile)
+index = IndexNode()
+# symin, symout, index= frame_init()
+# print ("[indexFile]",_indexFile)
+print ("[indexFile]",index)
 
-_f1 = InputTrackedFile('tests-number.txt',name='numberFile')
-_f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
+# _f1 = InputTrackedFile('tests-number.txt',name='numberFile')
+# _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
+_f1 = TrackedFile(index, 'tests-number.txt',name='numberFile')
+_f2 = TrackedFile(index, 'tests-letter.txt',name='letterFile')
 # _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
-print (_symbolicRootNode.input_kw)
+print (index._symbolicRootNode.input_kw)
 
-_p = TrackedDict(data={"a":1,"I am in the original script":2} , name='paramDict')
+_p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='paramDict')
 
-@RawNode.from_func({
-    "OUT":TrackedFile("tests-out5.txt",),
+@RawNode.from_func(index,
+    {
+    "OUT":TrackedFile(index, "tests-out5.txt",),
 })
 def out5(  self, (numberFile, letterFile, paramDict), 
     ):
@@ -31,8 +36,9 @@ def out5(  self, (numberFile, letterFile, paramDict),
     return
 
 
-@RawNode.from_func({
-    "OUT":TrackedFile("tests-out10.txt"),
+@RawNode.from_func(index,
+    {
+    "OUT":TrackedFile(index,"tests-out10.txt"),
 })
 def out10(  self, (numberFile, letterFile), ):
     '''
@@ -47,8 +53,9 @@ def out10(  self, (numberFile, letterFile), ):
     return
 
 
-@RawNode.from_func({
-    "OUT":TrackedFile("test-combined_short.txt"),
+@RawNode.from_func(index,
+    {
+    "OUT":TrackedFile(index,"test-combined_short.txt"),
 })
 def make_combined_short( self, (out5, out15), ):
     lines = []
@@ -58,8 +65,8 @@ def make_combined_short( self, (out5, out15), ):
         map(f.write,lines)
     return 1
 
-@RawNode.from_func({
-    "OUT":TrackedFile("tests-out15.txt"),
+@RawNode.from_func(index,{
+    "OUT":TrackedFile(index,"tests-out15.txt"),
 })
 def out15(  self, (numberFile, letterFile), ):
     '''
@@ -72,8 +79,8 @@ def out15(  self, (numberFile, letterFile), ):
     return
 
 
-@RawNode.from_func({
-    'OUT':TrackedFile('tests-combined.txt')
+@RawNode.from_func(index,{
+    'OUT':TrackedFile(index,'tests-combined.txt')
 })
 def make_combined( self, (out5, out10, out15,), ):
     lines = []

@@ -90,9 +90,61 @@ def _open(*a):
 #         return open(self.path,*a, **kw)
     
 
+class IndexNode(object):
+# class Pipeline(object):
+    def __repr__(self):
+        return "%s(path=%r)"%(self.__class__.__name__, self.path)
+    def __init__(self,path = None, frame=None):
+        frame = frame__default(frame)
+        self._symbolicRootNode = SymbolicRootNode(
+            self,lambda self:[x() for x in self.input_kw.values()], 
+            _dict(), _dict(),0,frame,1,'_symbolicRootNode', None,) 
+        self._symbolicOutputNode = SymbolicOutputNode(
+            self,
+            lambda self:[x() for x in self.input_kw.values()],
+        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None, )
+        self._symbolicInputNode = RawNode(
+            self, lambda self:None,
+        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None,)  
+        if path is None:
+            path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
+        self.path = path
+        # self.path = 
+        # vars(self)['_symbolicRootNode'] = SymbolicRootNode(
+        #     lambda self:[x() for x in self.input_kw.values()],
+        #     _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)        
+        # vars(self)['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
+        #     lambda self:[x() for x in self.input_kw.values()],
+        # _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
 
-class IndexFile(object):
-    pass
+        # vars(self)['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
+        # _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)        
+        return
+
+
+def frame_init(frame=None):
+    '''
+    Adding constants to this frame
+    '''
+    frame = frame__default(frame)
+    print ("[FRAME_INIT] _symbolicInputNode, _symbolicOutputNode")
+    indexFile = frame.f_locals['_indexFile'] = index_get_default(frame)
+    # indexFile = frame.f_locals['_indexFileNode'] = index_get_default(frame)
+
+    frame.f_locals['_symbolicRootNode'] = rootNode = SymbolicRootNode(
+        lambda self:[x() for x in self.input_kw.values()],
+        _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)
+
+    frame.f_locals['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
+        lambda self:[x() for x in self.input_kw.values()],
+        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
+
+    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
+        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)
+
+    return symin,symout,indexFile
+
+
 def st_time_size(st):
     return (st.st_mtime, st.st_size)
 
@@ -197,16 +249,16 @@ class RawNode(object):
     def __call__(self,*a,**kw):
         return self.called_value
     
-    def __init__(self, func, input_kw, output_kw, force, frame, skip, name, tag):
+    def __init__(self, index, func, input_kw, output_kw, force, frame, skip, name, tag, ):
         # input_kw = None
         # output_kw = None
+        frame = frame__default(frame)
         if name is not None:
             func.__name__ = name
         if output_kw is None:
             output_kw = _dict()
 
         self.func_orig = func
-
         # self.func_orig_source = _get_func_source(func)
         self.f = func
         self.tag = tag
@@ -214,8 +266,8 @@ class RawNode(object):
         self.init_output_kw = output_kw
         self.force = force
         # self._frame = 
-        frame = frame__default(frame)
-        self.indexFile = frame.f_locals['_indexFile']
+        # self.indexFile = frame.f_locals['_indexFile']
+        self.index = self.indexFile = index
         self._attach_to_root(frame)
         self._level_stream = {self,}
         # print(self,self.level_stream)
@@ -456,14 +508,14 @@ class RawNode(object):
         return input_kw,output_kw
 
     @classmethod
-    def from_func(cls, output_kw=None, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
+    def from_func(cls, index, output_kw=None, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
         def _dec(func):
             _frame = frame__default(frame)
             # None
 
             ### add ouput_kw
             # assert 'returned' not in okw, (okw.keys(), func)
-            self = cls(func, input_kw, output_kw, force, _frame, skip, name, tag)
+            self = cls(index, func, input_kw, output_kw, force, _frame, skip, name, tag)
             # self._attach_func(func, _frame, skip)
             return self        
         
@@ -475,7 +527,8 @@ class RawNode(object):
 
     def _attach_to_root(self,frame=None):
         frame = frame__default(frame)
-        self._root = _root = frame.f_locals['_symbolicRootNode']
+        self._root = self.indexFile._symbolicRootNode
+        # self._root = _root = frame.f_locals['_symbolicRootNode']
         self._root.input_kw[ self.name ] = self
 
         pass
@@ -549,11 +602,11 @@ class TrackedFile(RawNode):
     def __call__(self,*a,**kw):
         return self
 
-    def __init__(self, path, func = None, input_kw={},output_kw={},force=0, frame=None,skip=1,name=None,tag=None):
+    def __init__(self, index, path,  func = None, input_kw={},output_kw={},force=0, frame=None,skip=1,name=None,tag=None):
         if func is None:
             func = lambda:None
         frame = frame__default(frame)
-        super( TrackedFile,self).__init__(func, input_kw, output_kw, force, frame, skip, name, tag)
+        super( TrackedFile,self).__init__(index, func,  input_kw, output_kw, force, frame, skip, name, tag)
         self.path=path
 
 
@@ -633,51 +686,12 @@ class TrackedFile(RawNode):
         # return val
 
     
-
-
-class Pipeline(object):
-    def __init__(self,frame=None):
-        frame = frame__default(frame)
-        vars(self)['_symbolicRootNode'] = SymbolicRootNode(
-            lambda self:[x() for x in self.input_kw.values()],
-            _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)        
-        vars(self)['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
-            lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
-
-        vars(self)['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
-        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)        
-        return
-
-
-def frame_init(frame=None):
-    '''
-    Adding constants to this frame
-    '''
-    frame = frame__default(frame)
-    print ("[FRAME_INIT] _symbolicInputNode, _symbolicOutputNode")
-    indexFile = frame.f_locals['_indexFile'] = index_get_default(frame)
-    # indexFile = frame.f_locals['_indexFileNode'] = index_get_default(frame)
-
-
-    frame.f_locals['_symbolicRootNode'] = rootNode = SymbolicRootNode(
-        lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicRootNode', None)
-
-    frame.f_locals['_symbolicOutputNode'] = symout  = SymbolicOutputNode(
-        lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None)
-
-    frame.f_locals['_symbolicInputNode'] = symin  =  RawNode(lambda self:None,
-        _dict(), _dict(),0,frame,1,'_symbolicInputNode',None)
-
-    return symin,symout,indexFile
-
-# class TrackedFileNode(RawFile):
+#####################
+#####################
 
 class TrackedFileNode(TrackedFile):
     pass
-    def __init__(self,  path, input_func=None, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
+    def __init__(self,  index,  path,  input_func=None, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
         if nodeClass is None:
             nodeClass = AutoNode
         frame = frame__default(frame)
@@ -687,6 +701,7 @@ class TrackedFileNode(TrackedFile):
         if input_func is None:
             input_func = lambda self, (_symbolicInputNode,):None
         self.node = nodeClass(
+            index,
             input_func, 
             input_kw = _dict(), output_kw= _dict(), force=force,
             frame = frame, skip=skip,

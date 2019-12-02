@@ -23,7 +23,7 @@ import pipedata.base as pipedata
 # from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
 from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
-from pipedata.base import frame_init
+from pipedata.base import frame_init, IndexNode
 
 import pipedata.types
 # import os as pip/e
@@ -53,8 +53,8 @@ class PipeRunner(object):
         self.pipe = imp.load_source( key, fname)
         
     def __call__(self,*a,**kw):
-        pipe_run(self.pipe)
-        return self.pipe
+        pipe_run(self.pipe.index)
+        return self.pipe.index
     
 
 def _dbg():
@@ -77,9 +77,10 @@ class Case(unittest.TestCase):
         return pipe
     def test_repr_tracked_dict(self):
         # PipeRunner('pipe','pipe.py')
-        __file__ = '__test__'
-        frame_init()
-        v = TrackedDict('test',dict(JOB_INDEX=123,))        
+        # __file__ = '__test__'
+        # frame_init()
+        index = IndexNode(path='__test__.py.index')
+        v = TrackedDict( index, 'test',dict(JOB_INDEX=123,))        
         s = repr(v)
         vnew = eval(s)
         assert vnew.data == v.data,(s,v,vnew)
@@ -159,7 +160,7 @@ rm tests-out5.txt
             with open("pipe.py",'a+') as f:
                 
                 f.write(r'''
-_p = TrackedDict(data={"a":1,"foo":"why am i here?"} , name='paramDict')
+_p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
 ''')
 
@@ -185,8 +186,8 @@ _p = TrackedDict(data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
 
 ### changed 10 to 25
-@RawNode.from_func({
-    "OUT":TrackedFile("tests-out10.txt"),
+@RawNode.from_func(index,{
+    "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def out10(  self, (numberFile, letterFile),):
@@ -208,9 +209,9 @@ def out10(  self, (numberFile, letterFile),):
             with open("pipe.py",'a+') as f:
                 f.write(r'''
 ### add dependency on dummy file
-dummyFile = InputTrackedFile('test-dummy.txt')
-@RawNode.from_func({
-    "OUT":TrackedFile("tests-out10.txt"),
+dummyFile = InputTrackedFile(index,'test-dummy.txt')
+@RawNode.from_func(index,{
+    "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
 def out10(  s, (numberFile, letterFile,  dummyFile) ):
@@ -236,8 +237,8 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
         with path.Path(self.test_1()).makedirs_p() as d:
             with open("pipe.py",'a+') as f:
                 f.write(r'''
-@RawNode.from_func({{
-    "OUT":TrackedFile("tests-out10.txt"),
+@RawNode.from_func(index,{{
+    "OUT":TrackedFile(index,"tests-out10.txt"),
 }})
 def out10(  self, (numberFile, letterFile),):
     ###
@@ -291,7 +292,7 @@ def out10(  self, (numberFile, letterFile),):
             _shell('''
 rm tests-out5.txt             
 ''')        
-            nodes = pipe._symbolicRootNode.input_kw.values()
+            nodes = pipe.index._symbolicRootNode.input_kw.values()
             [node.changed for node in nodes]
             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
             
@@ -304,7 +305,7 @@ rm tests-out5.txt
             _shell('''
 rm tests-letter.txt             
 ''')        
-            nodes = pipe._symbolicRootNode.input_kw.values()
+            nodes = pipe.index._symbolicRootNode.input_kw.values()
             [node.changed for node in nodes]
 #             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
             [[sys.stderr.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
@@ -315,11 +316,12 @@ rm tests-letter.txt
     def test_level_stream(self):
         from pipedata.types import TrackedFile, InputTrackedFile,  frame_init
         __file__ = 'test_temp.py'
-        frame_init()
+        # frame_init()
 
-        out5 = InputTrackedFile("a.txt",input_func=lambda self,:None).node
-        File1 = InputTrackedFile("tests-out5.txt",input_func=lambda self,(out5,):None).node
-        File2 = InputTrackedFile("tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        index = IndexNode('__temp.py.index')
+        out5 = InputTrackedFile(index,"a.txt",input_func=lambda self,:None).node
+        File1 = InputTrackedFile(index,"tests-out5.txt",input_func=lambda self,(out5,):None).node
+        File2 = InputTrackedFile(index, "tests-outxx.txt",input_func=lambda self,(out5,):None).node
         out5.merge(File1)
         out5.merge(File2)
         # File2.merge(out5)
@@ -328,9 +330,9 @@ rm tests-letter.txt
         print (File2.level_stream)
         assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
 
-        out5 = InputTrackedFile("a.txt",input_func=lambda self,:None).node
-        File1 = InputTrackedFile("tests-out5.txt",input_func=lambda self,(out5,):None).node
-        File2 = InputTrackedFile("tests-outxx.txt",input_func=lambda self,(out5,):None).node
+        out5 = InputTrackedFile(index, "a.txt",input_func=lambda self,:None).node
+        File1 = InputTrackedFile(index, "tests-out5.txt",input_func=lambda self,(out5,):None).node
+        File2 = InputTrackedFile(index, "tests-outxx.txt",input_func=lambda self,(out5,):None).node
         out5.merge(File1)
         # out5.merge(File2)
         File2.merge(out5)
