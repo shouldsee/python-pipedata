@@ -19,8 +19,13 @@ from pipedata.pipe_run import pipe_run
 # , _load_source
 import imp
 import sys
-import pipedata._pipedata as pipedata
-from pipedata._pipedata import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
+import pipedata.base as pipedata
+# from pipedata.types import TrackedDic
+from pipedata.types import TrackedDict
+from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
+from pipedata.base import frame_init
+
+import pipedata.types
 # import os as pip/e
 def _shell(cmd,shell=True):
     sys.stderr.write("[CMD]%s\n"%cmd)
@@ -37,7 +42,7 @@ class PipeRunner(object):
             fname
         self.key = key
         key = self.key
-        import pipedata.types as pipedata
+        import pipedata.base as pipedata
         imp.reload(pipedata)
         pipedata.IndexedDiffFileError = IndexedDiffFileError
         pipedata.IndexedMissingFileError = IndexedMissingFileError
@@ -52,6 +57,15 @@ class PipeRunner(object):
         return self.pipe
     
 
+def _dbg():
+    import inspect
+    pr = PipeRunner('pipe','pipe.py')
+    f = pr.pipe.out10.f
+    _code = f.__code__
+    print (_code.co_code.__repr__())
+    print (_code.co_consts.__repr__())
+    print (inspect.getsource(f))
+
 class Case(unittest.TestCase):
     def test_import(self):
         pass
@@ -61,6 +75,14 @@ class Case(unittest.TestCase):
 #         import tests.example_string_short as pipe
 #         pipe.__file__ = os.path.realpath(pipe.__file__)
         return pipe
+    def test_repr_tracked_dict(self):
+        # PipeRunner('pipe','pipe.py')
+        __file__ = '__test__'
+        frame_init()
+        v = TrackedDict('test',dict(JOB_INDEX=123,))        
+        s = repr(v)
+        vnew = eval(s)
+        assert vnew.data == v.data,(s,v,vnew)
         
     def test_dillable(self):
         pipe = self.test_import()
@@ -125,17 +147,28 @@ rm tests-out5.txt
             self.assertRaises( IndexedMissingFileError, PipeRunner('pipe','pipe.py'))
             pass
         return
-    
+
+    def test_tracked_dict_indexed_diff(self):
+        with path.Path(self.test_1()).makedirs_p() as d:
+            class index_diff_error(Exception):
+                pass
+            def getPr():
+                pr =  PipeRunner('pipe','pipe.py')
+                pr.pipe.TrackedDict._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
+                return pr
+            with open("pipe.py",'a+') as f:
+                
+                f.write(r'''
+_p = TrackedDict(data={"a":1,"foo":"why am i here?"} , name='paramDict')
+
+''')
+
+
+            # pr = getPr()
+            self.assertRaises( index_diff_error, getPr() )
+
     def test_changedNode(self):
         with path.Path(self.test_1()).makedirs_p() as d:
-            def _dbg():
-                import inspect
-                pr = PipeRunner('pipe','pipe.py')
-                f = pr.pipe.out10.f
-                _code = f.__code__
-                print (_code.co_code.__repr__())
-                print (_code.co_consts.__repr__())
-                print (inspect.getsource(f))
 
             class index_diff_error(Exception):
                 pass

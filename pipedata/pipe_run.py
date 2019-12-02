@@ -1,4 +1,4 @@
-from pipedata.types import index_file_flush
+from pipedata.base import index_file_flush
 
 import imp
 import os

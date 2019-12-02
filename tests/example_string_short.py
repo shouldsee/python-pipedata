@@ -1,4 +1,5 @@
-from pipedata.types import RawNode,TrackedFile, InputTrackedFile, frame_init
+from pipedata.base import RawNode,TrackedFile, InputTrackedFile, frame_init, Pipeline
+from pipedata.types import TrackedDict
 import os
 
 symin, symout, index= frame_init()
@@ -9,10 +10,12 @@ _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
 # _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
 print (_symbolicRootNode.input_kw)
 
+_p = TrackedDict(data={"a":1,"I am in the original script":2} , name='paramDict')
+
 @RawNode.from_func({
     "OUT":TrackedFile("tests-out5.txt",),
 })
-def out5(  self, (numberFile, letterFile), 
+def out5(  self, (numberFile, letterFile, paramDict), 
     ):
     '''
     some doc
