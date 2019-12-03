@@ -5,7 +5,6 @@ from pipedata.types import TrackedDict,RemoteNode,MasterNode
 import os
 index = IndexNode()
 # assert 0
-from pymisca.shell import shellexec as _shell
 
 # _d = TrackedDict(index,'meta', 
 #     dict(DATA_ACC="ABC123"))

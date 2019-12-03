@@ -2,3 +2,4 @@ dill
 filelock
 decorator
 path.py
+attrdict
