@@ -22,12 +22,12 @@ import sys
 import pipedata.base as pipedata
 # from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
-from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError, ChangedOutputError
+# from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError, ChangedOutputError
 # from pipedata.types import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 from pipedata.base import IndexNode
 
 from pipedata.types import TrackedFile, InputTrackedFile
-from pipedata.types import SlaveNode
+from pipedata.types import SlaveNode,AbstractNode
 import pipedata.types
 
 
@@ -78,10 +78,10 @@ def _dbgf():
 class SharedCases(object):
     _realpath = path.Path(__file__).dirname().dirname().realpath()
     PipeRunner = PipeRunner
-    IndexedDiffFileError = IndexedDiffFileError
-    IndexedMissingFileError = IndexedMissingFileError
-    ChangedNodeError = ChangedNodeError
-    ChangedOutputError = ChangedOutputError
+    IndexedDiffFileError = AbstractNode.IndexedDiffFileError
+    IndexedMissingFileError = AbstractNode.IndexedMissingFileError
+    ChangedNodeError = AbstractNode.ChangedNodeError
+    ChangedOutputError = AbstractNode.ChangedOutputError
     def realpath(self):
         return self._realpath
     @staticmethod
@@ -145,19 +145,7 @@ echo 123> tests-out10.txt
             self._shell('''
 rm tests-out5.txt             
 ''')
-            # PipeRunner('pipe','pipe.py')()
-            # try:
-            #     PipeRunner('pipe','pipe.py')()
-            # except Exception as e:
-            #     assert 0
-            # finally:
-            #     assert 0
-
-               # print("DONE")
-            # except Exception as e:
-            #     _dbg()
-
-            self.assertRaises( ChangedOutputError, PipeRunner('pipe','pipe.py'))
+            self.assertRaises( self.ChangedOutputError, PipeRunner('pipe','pipe.py'))
             pass
         return
 

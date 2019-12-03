@@ -21,6 +21,7 @@ import shutil
 # from _inspect_patch import inspect
 
 from pipedata._ast_util import ast_proj
+from pipedata._util import cached_property
 from attrdict import AttrDict
 
 try:
@@ -66,10 +67,6 @@ class Dumper(object):
     pass
 dumper = Dumper
 
-    # dumps(s, cls=MyEncoder )
-        # return o.__dict__   
-# def file_not_empty(fpath):
-#     return os_stat_safe(fpath) != os_stat_result_null
 
 def frame__default(frame=None):
     '''
@@ -80,26 +77,6 @@ def frame__default(frame=None):
     else:
         pass    
     return frame
-
-class cached_property(object):
-    """
-    Descriptor (non-data) for building an attribute on-demand on first use.
-    Source: https://stackoverflow.com/a/4037979/8083313
-    """
-    def __init__(self, factory):
-        """
-        <factory> is called such: factory(instance) to build the attribute.
-        """
-        self._attr_name = factory.__name__
-        self._factory = factory
-
-    def __get__(self, instance, owner):
-        # Build the attribute.
-        attr = self._factory(instance)
-
-        # Cache the value; hide ourselves.
-        setattr(instance, self._attr_name, attr)
-        return attr
     
     
 def _open(*a):
@@ -108,23 +85,6 @@ def _open(*a):
 
 def st_time_size(st):
     return (st.st_mtime, st.st_size)
-
-
-
-
-class IndexedMissingFileError(Exception):
-    '''
-    index_absent=0, file_absent=1
-    suppress if the hooks not enabled
-    '''
-    pass
-class IndexedDiffFileError(Exception):
-    '''
-    index_absent=0, file_absent=1
-    suppress if the hooks not enabled
-    '''
-    pass
-
 
 
 def _dbgf():        
@@ -241,204 +201,7 @@ class IndexNode(object):
         
         return dest
 
-
-class _INIT_VALUE(object):
-    pass
-class ChangedNodeError(Exception):
-    pass
-class ChangedOutputError(Exception):
-    pass
-returned =  _INIT_VALUE()
-
-class AbstractNode(object):
-    ChangedOutputError = ChangedOutputError
-    force_index_update = 0 
-    tag = None
-    def __init__(self, index, func, input_kw, output_kw, name):
-        assert not input_kw,"input_kw should be extracted from the function"
-        if name is not None:
-            func.__name__ = name
-        self.func_orig = func
-        self._level_stream = {self,}
-        self.init_output_kw = output_kw
-        self.index = self.indexFile = index
-        self._attach_to_root()
-        self.runned = 0 
-        self.running = 0
-
-    def __repr__(self):
-        return "%s(recordId=%s,func=%r,index=%r)" % (
-            self.__class__.__name__,
-            self.recordId,
-            self.func, 
-            self.index
-            # ':tag:%s'% self.tag if self.tag else ''
-            )
-        # return '{self.__class__.__name__}()'.format(**locals())
-        # return '<Node with func:%s%s>' % (self.func.__name__, 
-        #         ':tag:%s'% self.tag if self.tag else '')
-
-    def __call__(self,*a,**kw):
-        return self.called_value
-
-    def as_record(self):
-        assert 0 ,"TBI"
-        # raise Exception("Not initialised")
-    def as_snapshot(self):
-        return self.as_record()
-
-    @cached_property
-    def _changed(self):
-        assert 0,"TBI"
-    @property
-    def recordId(self):
-        return self.name
-        # assert 0,"TBI"
-
-    @property
-    def name(self):
-        return self.func.__name__
-        pass
-
-    @property
-    def func(self,):
-        return self.func_orig
-
-    def _get_func_code(self, func):
-        sourcefile = self.index.path.replace('.py.index','.py')
-        linecache.checkcache( sourcefile )
-        # func.__module__.__file__)
-        return  inspect.getsource(func, )
-        # sourcefile)
-
-    def get_record(self):
-        return self.index.get_record( self.recordId, None)        
-
-    def _index_update(self):
-        # print ("[UPDATING_INDEX]%s"%self,)
-        return self.index.index_file_update( self.recordId, self.as_record())
-
-    def index_update(self):
-        return [x._index_update() for x in self.level_stream]
-
-    # def index_update(self):
-    #     return self._index_update()
-
-    @property
-    def level_stream(self,):
-        return self._level_stream
-
-    def merge(self,other):
-        self._level_stream.update(other._level_stream)
-        other._level_stream.update(self._level_stream)
-        other._level_stream = self._level_stream
-        return self
-
-
-    @property
-    def changed(self):
-        self.initialised_tuples ## lookup upsteram and downstream
-        return any([ x._changed for x in self.level_stream])
-
-    @cached_property
-    def changed_upstream( self,):
-        self.input_kw
-        return [x for x in self.input_kw.values() if any([ x.changed_upstream, x.changed])]
-
-
-
-    @cached_property
-    def called_value(self,*a,**kw):
-        return self._get_called_value()
-    def _get_called_value(self,*a,**kw):
-        '''
-        #### evalutaion of value/sideeffects
-        Core functionality to make  
-        '''
-        if self.changed_upstream:
-            for x in self.input_kw.values():
-                with x.index.realpath().dirname():
-                    x.called_value
-            # [ x.called_value for x in self.input_kw.values() ]
-        if any([self.changed_upstream,self.changed]): 
-            self.running = 1
-            print("RUNNING:%s"%self)
-            input_kw, output_kw = self.initialised_tuples
-            args = inspect.getargspec(self.func)[0]
-            self.returned = self.func(*([x[1] for x in zip(args, (self, input_kw.values(), output_kw.values() ))]) )
-
-            self.running = 0
-            self.runned = 1
-        else:
-            self.runned = 0
-
-        # if self.runned or self.force_index_update:
-        if self.runned:
-            _ = '''
-            Once running is complete, trigger an update to index file
-            '''
-            self.index_update()
-            self.index_updated = 1
-        else:
-            self.index_updated = 0
-            pass
-            # [x.index_update() for x in self.output_kw.values()]
-        self.committed = 1
-        return self
-
-
-
-    ###### initialisation of graph
-    def _init_func(self, d=None, skip =1):
-        f = self.func
-        if d is None:
-            d = self._root.input_kw
-            # d = frame__default(frame).f_locals
-        else:
-            pass
-            # assert frame is None
-        (args, varargs, keywords, defaults) = inspect.getargspec(self.func)
-        defaults = defaults or () ## this is for kwargs
-
-        self, input, output = args + ( 3 - len(args) ) * [(),]
-        input_kw = _dict([ (key,d[key])  for key in input])
-        output_kw = _dict([ (key,d[key])  for key in output])
-        return input_kw,output_kw
-
-
-    @cached_property
-    def initialised_tuples(self):
-        ### fill default and add decorate to return output_kw
-        # self.func = self.func_orig
-
-        input_kw,output_kw = self._init_func()
-        self.func.__defaults__ = ( input_kw.values(), output_kw.values())
-        # _dec(self.func)
-        if output_kw:
-            assert not self.init_output_kw,"Decorator must be empty if the 3rd argument exists of funcion %s" % self.func.func_code
-            output_kw = output_kw
-        else:
-            output_kw = self.init_output_kw
-        self._output_kw = output_kw
-        self._level_stream.update( output_kw.values() )
-        return input_kw,output_kw
-
-    @property
-    def output_kw(self):
-        # input_kw,output_kw = self.initialised_tuples
-        self.initialised_tuples
-        return self._output_kw
-    @property
-    def input_kw(self):
-        input_kw,output_kw = self.initialised_tuples
-        return input_kw
-
-    def _attach_to_root(self,):
-        # frame = frame__default(frame)
-        self._root = self.indexFile._symbolicRootNode
-        # self._root = _root = frame.f_locals['_symbolicRootNode']
-        self._root.input_kw[ self.name ] = self
-
+# from pipedata.abstract_node import AbstractNode
 
 class RawNode(object):
     pass

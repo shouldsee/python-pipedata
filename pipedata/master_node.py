@@ -1,6 +1,6 @@
-from pipedata.base import AbstractNode
 from pipedata.base import cached_property,_dict, dumper
 from pipedata._ast_util import ast_proj
+from pipedata.abstract_node import AbstractNode
 
 from path import Path
 import re

@@ -1,6 +1,6 @@
 from pipedata.base import cached_property,frame__default,_dict
-from pipedata.base import IndexedDiffFileError
-from pipedata.base import RawNode,AbstractNode
+# from pipedata.base import IndexedDiffFileError
+from pipedata.abstract_node import AbstractNode
 import path
 import imp
 class RemoteNode(AbstractNode):
@@ -64,7 +64,7 @@ class RemoteNode(AbstractNode):
     def _hook_indexed_diff_file(self):
         # self.force_index_update = 1
         # return 
-        raise IndexedDiffFileError(self)
+        raise self.IndexedDiffFileError(self)
 
     def _hook_indexed_missing_file(self):
         return 1
