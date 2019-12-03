@@ -120,23 +120,14 @@ class IndexNode(object):
 
         self._symbolicRootNode = SymbolicRootNode(
             self, lambda :None, _dict(),_dict(), None)
-        ##### outputNode not enabled
-        # self._symbolicOutputNode = AbstractNode(
-        #     self, lambda :None, _dict(),_dict(), "_symbolicOutputNode")
-        # self._symbolicOutputNode = SymbolicOutputNode(
-        #     self,
-        #     lambda self:[x() for x in self.input_kw.values()],
-        # _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None, )
 
-        # self._symbolicInputNode = RawNode(
-        #     self, lambda self:None,
-        # _dict(), _dict(),0,frame,1,'_symbolicInputNode',None,)  
 
         if path is None:
             path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
 
         self.path = Path(path).realpath()
         self.update_queue = _dict()
+
     @property
     def _root(self):
         return self._symbolicRootNode
@@ -154,14 +145,9 @@ class IndexNode(object):
             d.update( self.update_queue )
             print("[FLUSHING_INDEX]",self.path)
             with open(fname,"wb") as f:
-                # dill.dump( d, f, )
                 f.write(dumper._dumps(d))
-                # f.write(dill.dumps( d))
-                # , f, )
-                # dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
 
 
-        # return _index_file_flush(self.update_queue, self.path)
     @cached_property
     def records_cached(self):
         if file_not_empty( self.path):

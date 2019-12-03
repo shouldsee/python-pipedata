@@ -33,9 +33,6 @@ class AbstractNode(object):
             self.index
             # ':tag:%s'% self.tag if self.tag else ''
             )
-        # return '{self.__class__.__name__}()'.format(**locals())
-        # return '<Node with func:%s%s>' % (self.func.__name__, 
-        #         ':tag:%s'% self.tag if self.tag else '')
 
     def __call__(self,*a,**kw):
         return self.called_value
