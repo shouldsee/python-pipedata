@@ -4,6 +4,7 @@ unittest.TestCase.assertRaises
 
 import os,sys
 
+__file__ = os.path.realpath(__file__)
 import path
 import imp
 

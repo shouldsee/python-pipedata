@@ -11,17 +11,7 @@ import os
 #     return mod
 
 def pipe_run(self):
-#     pipe.TrackedFile.VERBOSE=0
-    # !rm -f {pipe.index.path}
-    # print pipe.index.
     print('START' + 20*"-")
-    # nodes = [self._symbolicOutputNode.input_kw]
-    # self._symbolicOutputNode()
-    # vars(self)
     [ x() for x in self.node_dict.values()]
-    # assert 0,self._symbolicRootNode.input_kw
-    # print os.path.realpath( self._indexFile.path )
-    # for x in  self._symbolicOutputNode.input_kw
-    # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
     self.index_file_flush()
     print('END' + 20*"-")

@@ -86,9 +86,10 @@ def make_combined( self, (out5, out10, out15,), ):
 
 
 if __name__ == '__main__':
-    print('START' + 20*"-")
-    self = index
-    with self.path.dirname():
-        [ x() for x in self._symbolicRootNode.input_kw.values()]
-    self.index_file_flush()
-    print('END' + 20*"-")
+    index.main()
+    # print('START' + 20*"-")
+    # self = index
+    # with self.path.dirname():
+    #     [ x() for x in self._symbolicRootNode.input_kw.values()]
+    # self.index_file_flush()
+    # print('END' + 20*"-")

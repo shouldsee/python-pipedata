@@ -1,0 +1,25 @@
+Processing /work/repos/pipedata
+Requirement already satisfied: dill in /home/shouldsee/.local/lib/python2.7/site-packages (from pipedata==0.0.3) (0.3.0)
+Requirement already satisfied: filelock in /home/shouldsee/.local/lib/python2.7/site-packages (from pipedata==0.0.3) (3.0.12)
+Requirement already satisfied: decorator in /home/shouldsee/.local/lib/python2.7/site-packages (from pipedata==0.0.3) (4.1.2)
+Requirement already satisfied: path.py in /home/shouldsee/.local/lib/python2.7/site-packages (from pipedata==0.0.3) (11.5.0)
+Requirement already satisfied: attrdict in /home/shouldsee/.local/lib/python2.7/site-packages (from pipedata==0.0.3) (2.0.1)
+Requirement already satisfied: importlib-metadata>=0.5 in /home/shouldsee/.local/lib/python2.7/site-packages (from path.py->pipedata==0.0.3) (0.8)
+Requirement already satisfied: backports.os; python_version == "2.7" and sys_platform == "linux2" in /home/shouldsee/.local/lib/python2.7/site-packages (from path.py->pipedata==0.0.3) (0.1.1)
+Requirement already satisfied: six in /home/shouldsee/.local/lib/python2.7/site-packages (from attrdict->pipedata==0.0.3) (1.11.0)
+Requirement already satisfied: configparser; python_version < "3" in /home/shouldsee/.local/lib/python2.7/site-packages (from importlib-metadata>=0.5->path.py->pipedata==0.0.3) (3.5.0)
+Requirement already satisfied: contextlib2; python_version < "3" in /home/shouldsee/.local/lib/python2.7/site-packages (from importlib-metadata>=0.5->path.py->pipedata==0.0.3) (0.5.5)
+Requirement already satisfied: zipp>=0.3.2 in /home/shouldsee/.local/lib/python2.7/site-packages (from importlib-metadata>=0.5->path.py->pipedata==0.0.3) (0.3.3)
+Requirement already satisfied: pathlib2; python_version < "3" in /home/shouldsee/.local/lib/python2.7/site-packages (from importlib-metadata>=0.5->path.py->pipedata==0.0.3) (2.3.0)
+Requirement already satisfied: future in /home/shouldsee/.local/lib/python2.7/site-packages (from backports.os; python_version == "2.7" and sys_platform == "linux2"->path.py->pipedata==0.0.3) (0.18.0)
+Requirement already satisfied: scandir; python_version < "3.5" in /home/shouldsee/.local/lib/python2.7/site-packages (from pathlib2; python_version < "3"->importlib-metadata>=0.5->path.py->pipedata==0.0.3) (1.6)
+Building wheels for collected packages: pipedata
+  Running setup.py bdist_wheel for pipedata: started
+  Running setup.py bdist_wheel for pipedata: finished with status 'done'
+  Stored in directory: /tmp/pip-ephem-wheel-cache-fFrp2M/wheels/4b/db/a0/e994d77addd0f5e1525d0c0f0ff2a123fdd97f346b2dc62134
+Successfully built pipedata
+Installing collected packages: pipedata
+  Found existing installation: pipedata 0.0.3
+    Uninstalling pipedata-0.0.3:
+      Successfully uninstalled pipedata-0.0.3
+Successfully installed pipedata-0.0.3

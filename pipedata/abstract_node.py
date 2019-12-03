@@ -1,6 +1,7 @@
 import linecache
 import inspect
-from pipedata._util import cached_property,_dict
+from pipedata._util import cached_property,_dict,_dbgf
+
 
 class _INIT_VALUE(object):
     pass
@@ -26,10 +27,10 @@ class AbstractNode(object):
         self.running = 0
 
     def __repr__(self):
-        return "%s(recordId=%s,func=%r,index=%r)" % (
+        return "%s(recordId=%s,index=%r)" % (
             self.__class__.__name__,
             self.recordId,
-            self.func, 
+            # self.func.__code__, 
             self.index
             # ':tag:%s'% self.tag if self.tag else ''
             )
@@ -96,6 +97,18 @@ class AbstractNode(object):
         self.initialised_tuples ## lookup upsteram and downstream
         return any([ x._changed for x in self.level_stream])
 
+    def changed_safe(self):
+        try:
+            changed = self.changed
+            e = None
+        except self.ChangedError as e:
+            changed = 1
+            # print (e)
+        # finally:
+        return changed,e
+
+
+
     @cached_property
     def changed_upstream( self,):
         self.input_kw
@@ -111,15 +124,20 @@ class AbstractNode(object):
         #### evalutaion of value/sideeffects
         Core functionality to make  
         '''
-        print("[UPSTRAM_CHANGED]",self)
+        # print("[UPSTRAM_CHANGED]",self)
+        # if self.__class__.__name__ == 'RemoteNode':
+        #     _dbgf()
+            
         if self.changed_upstream:
             for x in self.input_kw.values():
                 with x.index.realpath().dirname():
                     x.called_value
             # [ x.called_value for x in self.input_kw.values() ]
+        msg = "%s,%s,%s"%(self.recordId,self.changed_upstream,self.changed)
         if any([self.changed_upstream,self.changed]): 
             self.running = 1
-            print("RUNNING:%s"%self)
+            # print("RUNNING:%s"%self)
+            print("[RUNNING]%s"%msg)
             input_kw, output_kw = self.initialised_tuples
             args = inspect.getargspec(self.func)[0]
             self.returned = self.func(*([x[1] for x in zip(args, (self, input_kw.values(), output_kw.values() ))]) )
@@ -127,6 +145,7 @@ class AbstractNode(object):
             self.running = 0
             self.runned = 1
         else:
+            print("[SKIPPING]%s"%msg)
             self.runned = 0
 
         # if self.runned or self.force_index_update:
@@ -198,21 +217,23 @@ class AbstractNode(object):
         # self._root = _root = frame.f_locals['_symbolicRootNode']
         self.index.node_dict[self.name] = self
         # self._root.input_kw[ self.name ] = self
-
-    class IndexedMissingFileError(Exception):
+    class ChangedError(Exception):
+        pass
+    class IndexedMissingFileError(ChangedError):
         '''
         index_absent=0, file_absent=1
         suppress if the hooks not enabled
         '''
         pass
-    class IndexedDiffFileError(Exception):
+    class IndexedDiffFileError(ChangedError):
         '''
         index_absent=0, file_absent=1
         suppress if the hooks not enabled
         '''
         pass
-
-    class ChangedNodeError(Exception):
+    class ChangedSelfError(ChangedError):
         pass
-    class ChangedOutputError(Exception):
+    class ChangedNodeError(ChangedError):
+        pass
+    class ChangedOutputError(ChangedError):
         pass

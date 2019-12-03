@@ -14,7 +14,8 @@ def main(s,(out5,),
     return s
 
 if __name__ == '__main__':
-    print('START' + 20*"-")
-    [x() for x in index.node_dict.values()]
-    index.index_file_flush()
-    print('END' + 20*"-")
+    index.main()
+    # print('START' + 20*"-")
+    # [x() for x in index.node_dict.values()]
+    # index.index_file_flush()
+    # print('END' + 20*"-")

@@ -81,17 +81,6 @@ def st_time_size(st):
     return (st.st_mtime, st.st_size)
 
 
-def _dbgf():        
-    import pdb,traceback
-    print(traceback.format_exc())
-    import traceback
-    traceback.print_stack()
-    traceback.print_exc()
-    pdb.set_trace()    
-def _dbgfs():        
-    import pdb,traceback
-    pdb.set_trace()    
-
 
 
 class SymbolicRootNode(object):
@@ -191,12 +180,31 @@ class IndexNode(object):
         # if self.path.exists():
         _dest = dest / name+'.index'
         _dest.unlink_p()
-         # if _dest.exists() else None
-        
-        #     shutil.copy2( self.path, dest /  name+'.index')
-
-        
         return dest
+
+    def main(index):
+        argv = sys.argv
+        if '--changed' in argv:
+            del argv[argv.index('--changed')]
+            for k,v in index.node_dict.items():
+                changed,err = v.changed_safe()
+                if err is None:
+                    err = ''
+                print('\t'.join(("[CHANGED=%d]"%changed, k, v.__class__.__name__, repr(err), v.index.realpath(), )))
+                # print("[CHANGED=%d]"%v.changed_safe(),k,v, )
+        else:
+            index.sync()
+    def sync(index):
+        # elif :
+            print('START' + 20*"-")
+            [x() for x in index.node_dict.values()]
+            index.index_file_flush()
+            print('END' + 20*"-")
+
+
+    def collect_static(self):
+        print()
+        pass
 
 
 class RawNode(object):

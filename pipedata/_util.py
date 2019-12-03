@@ -1,5 +1,18 @@
 from collections import OrderedDict as _dict
 import subprocess
+
+def _dbgf():        
+    import pdb,traceback
+    print(traceback.format_exc())
+    import traceback
+    traceback.print_stack()
+    traceback.print_exc()
+    pdb.set_trace()    
+def _dbgfs():        
+    import pdb,traceback
+    pdb.set_trace()    
+
+
 class cached_property(object):
     """
     Descriptor (non-data) for building an attribute on-demand on first use.

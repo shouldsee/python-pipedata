@@ -41,47 +41,53 @@ class MasterNode(AbstractNode):
         raise self.ChangedOutputError("output for %s has changed since snapshot"%self)
 
 
-    def _hook_changed_record(self, changed_code,changed_input):
+    def _hook_changed_record(self, changed_self,changed_input):
         return 
 
     @cached_property
     def _changed_tuple(self):    
         recOld = self.get_record()
-        recNew = self.as_record()
+        recNew = self.as_record().copy()
         recs = [recOld,recNew]
         if recOld is None:
-            print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
+            # print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
             # self._hook_noindex()
-            changed_code, changed_input, changed_output = 1,1,1
+            changed_self, changed_input, changed_output = 1,1,1
 
         else:
             if recOld != recNew:
                 diff = _dict()
-                trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
-                changed_code = trees[0] != trees[1]
+                for rec in recs:
+                    rec['self']['ast_tree'] =ast_proj('\n'.join( rec['self'].pop('sourcelines')) )
+                # trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
+                # changed_self = trees[0] != trees[1]
+                changed_self = recOld['self'] != recNew['self']
                 changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
                 changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
                 if changed_output:
                     self._hook_changed_output(self, recOld,recNew)
-                print("[CHANGED_DIFF](%s,%s,%s),%s%s"%(changed_code,changed_input,changed_output,self,self.index,))
-                changed_code, changed_input,changed_output
-                self._hook_changed_record(changed_code, changed_input)
+                # print("[CHANGED_DIFF](%s,%s,%s),%s%s"%(changed_self,changed_input,changed_output,self,self.index,))
+                changed_self, changed_input,changed_output
+                self._hook_changed_record(changed_self, changed_input)
             else:
-                print("[CHANGED_SAME]%s%s"%(self.index,self))
-                changed_code, changed_input, changed_output = 0,0,0
-
-        return (changed_code,changed_input,changed_output)
+                # print("[CHANGED_SAME]%s%s"%(self.index,self))
+                changed_self, changed_input, changed_output = 0,0,0
+        changed_input = 0
+        return (changed_self,changed_input,changed_output)
+        
     def as_snapshot(self):
         return _dict([
         ('class', self.__class__.__name__),
-        ('sourcelines', self._get_func_code(self.func).splitlines()),
+        ('self',_dict( [('sourcelines', self._get_func_code(self.func).splitlines())]) ),
+        # ('self',[('sourcelines', self._get_func_code(self.func).splitlines())]),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
         return self.as_record()
     def as_record(self,):
         return _dict([
         ('class', self.__class__.__name__),
-        ('sourcelines', self._get_func_code(self.func).splitlines()),
+        ('self',_dict( [('sourcelines', self._get_func_code(self.func).splitlines())]) ),
+        # ('sourcelines', self._get_func_code(self.func).splitlines()),
         ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
@@ -100,7 +106,6 @@ class SlaveNode(AbstractNode):
         res = []
         for x in self.index.node_dict.values():
             if self in x.output_kw.values():
-                print (x,)
                 res.append(x)
         if len(res)!=1:
             raise self.DanglingSlaveError("Parent for %s is %s"%(self,res))
@@ -153,8 +158,8 @@ class SlaveFile(SlaveNode):
 
 class AutoMasterNode(MasterNode):
     # ChangedOutputError = 
-    class ChangedSelfError(Exception):
-        pass
+    # class ChangedSelfError(MasterNoed.ChangedError):
+    #     pass
     # ChangedOutputError = ChangedSelfError
     def _hook_changed_output(self,recOld,recNew):
         for k in recOld['output_snapshot']:

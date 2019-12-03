@@ -17,7 +17,8 @@ class RemoteNode(MasterNode):
     def __init__(self, index, remote_path, remote_name, name = None, frame=None,force=0 ):
         assert remote_path.endswith(".py")
         self.remote_name = remote_name
-        self.remote_path = path.Path(remote_path).realpath()
+        self.remote_path = (index.realpath().dirname() / remote_path).realpath()
+        # .realpath()
         self.force =force
         frame = frame__default(frame)
 
@@ -48,6 +49,9 @@ class RemoteNode(MasterNode):
 
     @cached_property
     def remote_node(self):
+        import warnings
+        # warnings.filterwarnings("ignore", message=".*not found while handling absolute import.*")
+        warnings.filterwarnings("ignore", module = self.remote_path)
         mod = imp.load_source( self.remote_path, self.remote_path)
         node = getattr(mod, self.remote_name)
         return node
@@ -58,23 +62,30 @@ class RemoteNode(MasterNode):
 
     def as_record(self):
         rec = super(RemoteNode,self).as_record()
-        rec.update(
-            [
-                ("self_remote_path" , self.remote_path),
-                ("self_remote_name" , self.remote_name),
-                ("self_remote_record",self.remote_node.as_snapshot()),
-            # ('input_snapshot',
-            #     [
-            #     ("remote_path" , self.remote_path),
-            #     ("remote_name" , self.remote_name),
-            #     ("remote_record",self.remote_node.as_snapshot()),
-            #     ]
-            # ),
+        rec['self'].update(
+                [
+                ("remote_path" , self.remote_path),
+                ("remote_name" , self.remote_name),
+                ("remote_record",self.remote_node.as_snapshot()),
+                ])
+        rec['output_snapshot'] = []
+        # rec.update(
+        #     [
+        #         ("self_remote_path" , self.remote_path),
+        #         ("self_remote_name" , self.remote_name),
+        #         ("self_remote_record",self.remote_node.as_snapshot()),
+        #     # ('input_snapshot',
+        #     #     [
+        #     #     ("remote_path" , self.remote_path),
+        #     #     ("remote_name" , self.remote_name),
+        #     #     ("remote_record",self.remote_node.as_snapshot()),
+        #     #     ]
+        #     # ),
 
-            ('output_snapshot',
-                []),
-            ]
-            )
+        #     ('output_snapshot',
+        #         []),
+        #     ]
+        #     )
         return rec
 
     # @property
