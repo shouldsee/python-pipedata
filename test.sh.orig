@@ -1,0 +1,10 @@
+set -e
+python test_all.py
+#python2 -m unittest discover -s tests
+<<<<<<< HEAD
+rm -f */*.index && python2 test_all.py BaseCase.test_init && python2 tests/example_bio.py
+=======
+#rm -f */*.index && python2 test_all.py Case.test_1 && python2 tests/example_bio.py
+>>>>>>> 6b25be18292b0634fad8feb778b15f611e1091f3
+
+#echo 100 >test_build/tests-number.txt && python2 tests/example_bio.py

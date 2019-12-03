@@ -2,6 +2,7 @@ from pipedata.base import cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
 from pipedata.base import RawNode
 
+
 class TrackedDict(RawNode):
     def __repr__(self,):
         return 'TrackedDict(index=%s, name=%r,force=%r,data=%r,)'%(self.index, self.name, self.force, self.data.items())
@@ -10,6 +11,7 @@ class TrackedDict(RawNode):
         return self
 
     def __init__(self, index, name, data, frame=None, force = 0):
+        assert 0,"Not functoinal yet,%s"%(self)
         self.data = _dict(data)
         frame = frame__default(frame)
         def _f(output_kw={}, func = None, input_kw={},skip=1, tag=None, ):

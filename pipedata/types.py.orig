@@ -1,6 +1,8 @@
 from pipedata.base import RawNode,TrackedFile,InputTrackedFile,  _dict
-from pipedata.base import IndexNode
+from pipedata.base import IndexNode,MasterNode
 from pipedata.tracked_dict import TrackedDict
 from pipedata.remote_node import RemoteNode
-from pipedata.master_node import MasterNode
-from pipedata.master_node import SlaveFile,SlaveNode,SelfSlaveFile
+<<<<<<< HEAD
+from pipedata.base import MasterNode
+=======
+>>>>>>> 6b25be18292b0634fad8feb778b15f611e1091f3

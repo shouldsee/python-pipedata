@@ -1,14 +1,18 @@
 import os,sys
 sys.path.insert(0, os.getcwd())
 from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
+<<<<<<< HEAD
+from pipedata.types import TrackedDict,RemoteNode
+=======
 from pipedata.types import TrackedDict,RemoteNode,MasterNode
+>>>>>>> 6b25be18292b0634fad8feb778b15f611e1091f3
 import os
 index = IndexNode()
 # assert 0
 from pymisca.shell import shellexec as _shell
 
-# _d = TrackedDict(index,'meta', 
-#     dict(DATA_ACC="ABC123"))
+_d = TrackedDict(index,'meta', 
+    dict(DATA_ACC="ABC123"))
 
 _ = '''
 if remote out5 is triggered, its index will be put into queue but not flushed.
@@ -28,12 +32,14 @@ There are two choices here:
   - in order to test for this, alter out5.txt, run the downstream script and check the status of combined.txt
   
 '''
-RemoteNode(index, remote_path='../stage1/pipe.py',remote_name='out5')
+RemoteNode(index,remote_path='../stage1/pipe.py',remote_name='out5')
 
+<<<<<<< HEAD
+@RawNode.from_func(index,)
+=======
 @MasterNode.from_func(index,)
-def main(s,(out5,),
-    # (meta,)
-    ):
+>>>>>>> 6b25be18292b0634fad8feb778b15f611e1091f3
+def main(s,(out5,),(meta,)):
     # out5.initialised
     # print (out5.remote_entity,)
     print ("[result]",out5(),out5())

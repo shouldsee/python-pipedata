@@ -1,6 +1,6 @@
 from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
 from pipedata.types import TrackedDict
-from pipedata.types import MasterNode,SlaveFile
+from pipedata.types import MasterNode, SlaveFile, SelfSlaveFile
 import os
 
 index = IndexNode()
@@ -10,12 +10,15 @@ print ("[indexFile]",index)
 
 # _f1 = InputTrackedFile('tests-number.txt',name='numberFile')
 # _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
-_f1 = InputTrackedFile( index, 'tests-number.txt',name='numberFile')
-_f2 = InputTrackedFile( index, 'tests-letter.txt',name='letterFile')
+
+# _f1 = InputTrackedFile( index, 'tests-number.txt',name='numberFile')
+# _f2 = InputTrackedFile( index, 'tests-letter.txt',name='letterFile')
+_f1 = SelfSlaveFile( index, 'tests-number.txt',name='numberFile')
+_f2 = SelfSlaveFile( index, 'tests-letter.txt',name='letterFile')
 # _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
 print (index._symbolicRootNode.input_kw)
 
-_p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='paramDict')
+# _p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='paramDict')
 
 # _f = SlaveFile(index, master="out5", path = "tests-out5.txt")
 @MasterNode.from_func(index,
@@ -23,7 +26,9 @@ _p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='par
     "OUT":  SlaveFile(index,  path = "tests-out5.txt"),
 
 })
-def out5(  self, (numberFile, letterFile, paramDict), 
+def out5(  self, (numberFile, letterFile, 
+    # paramDict
+    ), 
     ):
     '''
     some doc
@@ -47,8 +52,6 @@ def out10(  self, (numberFile, letterFile), ):
     '''
     some doc
     '''
-    '''
-    '''
     number = open( numberFile().path, 'r').read().strip()
     letter = open( letterFile().path, 'r').read().strip()
     with open(self['OUT']().path,'w') as f:
@@ -58,7 +61,7 @@ def out10(  self, (numberFile, letterFile), ):
 
 @MasterNode.from_func(index,
     {
-    "OUT":TrackedFile(index,"test-combined_short.txt"),
+    "OUT":SlaveFile(index,"test-combined_short.txt"),
 })
 def make_combined_short( self, (out5, out15), ):
     lines = []
@@ -69,7 +72,7 @@ def make_combined_short( self, (out5, out15), ):
     return 1
 
 @MasterNode.from_func(index,{
-    "OUT":TrackedFile(index,"tests-out15.txt"),
+    "OUT":SlaveFile(index,"tests-out15.txt"),
 })
 def out15(  self, (numberFile, letterFile), ):
     '''
@@ -83,7 +86,7 @@ def out15(  self, (numberFile, letterFile), ):
 
 
 @MasterNode.from_func(index,{
-    'OUT':TrackedFile(index,'tests-combined.txt')
+    'OUT':SlaveFile(index,'tests-combined.txt')
 })
 def make_combined( self, (out5, out10, out15,), ):
     lines = []
@@ -102,10 +105,6 @@ if __name__ == '__main__':
     self = index
     with self.path.dirname():
         [ x() for x in self._symbolicRootNode.input_kw.values()]
-    # assert 0,self._symbolicRootNode.input_kw
-    # print os.path.realpath( self._indexFile.path )
-    # for x in  self._symbolicOutputNode.input_kw
-    # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
     self.index_file_flush()
     print('END' + 20*"-")
 
