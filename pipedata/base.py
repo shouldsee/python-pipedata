@@ -36,12 +36,6 @@ def file_not_empty(fpath):
     '''
     return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
 
-# @property
-# def os_stat_result_null(
-#     _null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
-#     ):
-#     os.stat_result(st_mode=33188, st_ino=3567490, st_dev=2053, st_nlink=1, st_uid=1000, st_gid=1000, st_size=2, st_atime=1575340363, st_mtime=1575340597, st_ctime=1575340597)
-#     return _null
 
 _os_stat_result_null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
 def os_stat_safe(fname):
@@ -190,7 +184,6 @@ class IndexNode(object):
         
         return dest
 
-# from pipedata.abstract_node import AbstractNode
 
 class RawNode(object):
     pass

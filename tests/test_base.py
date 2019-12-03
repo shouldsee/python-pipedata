@@ -22,7 +22,8 @@ from pipedata.types import SlaveNode,AbstractNode
 import pipedata.types
 
 
-
+def _print(s,):
+    return s
 def _raise(e):
     raise e
 
@@ -58,6 +59,7 @@ def _dbg():
     print (_code.co_code.__repr__())
     print (_code.co_consts.__repr__())
     print (inspect.getsource(f))
+
 def _dbgf():        
     import pdb,traceback
     print(traceback.format_exc())
@@ -185,30 +187,27 @@ def out10(  self, (numberFile, letterFile),):
             
 #             _dbg()
             pr = getPr()
-    
-#             for k,v in pr.pipe._symbolicRootNode.input_kw.items():
-#                 print k,v.func_orig.func_code
-#             assert 0
             self.assertRaises( index_diff_error, getPr() )
 
-#             with open("pipe.py",'a+') as f:
-#                 f.write(r'''
-# ### add dependency on dummy file
-# dummyFile = InputTrackedFile(index,'test-dummy.txt')
-# @MasterNode.from_func(index,{
-#     "OUT":TrackedFile(index,"tests-out10.txt"),
-# #     "BAM":TrackedFile( "test.fastq.bam"  )
-# })
-# def out10(  s, (numberFile, letterFile,  dummyFile) ):
+    def _test_code_change2(self):
+        with open("pipe.py",'a+') as f:
+            f.write(r'''
+### add dependency on dummy file
+dummyFile = InputTrackedFile(index,'test-dummy.txt')
+@MasterNode.from_func(index,{
+"OUT":TrackedFile(index,"tests-out10.txt"),
+#     "BAM":TrackedFile( "test.fastq.bam"  )
+})
+def out10(  s, (numberFile, letterFile,  dummyFile) ):
 
-#     number = open( numberFile().path, 'r').read().strip()
-#     letter = open( letterFile().path, 'r').read().strip()
-#     with open(self['OUT']().path,'w') as f:
-#         f.write( 10 * (number+letter)+'\n')
-#     return
-# ''')
-#             self.assertRaises( index_diff_error, getPr() )
-        
+number = open( numberFile().path, 'r').read().strip()
+letter = open( letterFile().path, 'r').read().strip()
+with open(self['OUT']().path,'w') as f:
+    f.write( 10 * (number+letter)+'\n')
+return
+''')
+        self.assertRaises( index_diff_error, getPr() )
+    
             #### synonymous_code_change
     def test_code_syno_change(self):
 #         assert 0
@@ -289,16 +288,6 @@ SlaveFile(index,"dangling_slave.txt")
             pipe = pr.pipe
             # pipe.MasterNode.OLD = 0
 
-#             pipe.TrackedFile.VERBOSE = 0
-#             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
-            
-#             self._shell('''
-# rm tests-out5.txt             
-# ''')        
-#             nodes = pipe.index._symbolicRootNode.input_kw.values()
-#             [node.changed for node in nodes]
-#             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
-            
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
             # pipe.MasterNode.OLD = 0
