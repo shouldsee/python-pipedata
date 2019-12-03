@@ -7,6 +7,8 @@ import re
 from pipedata.base import os_stat_safe
 
 class MasterNode(AbstractNode):
+    DEBUG_SOURCE_CHANGE= 0
+    DEBUG_CHANGE_TUPLE = 1
     @property
     def recordId(self):
         return self.name
@@ -33,11 +35,11 @@ class MasterNode(AbstractNode):
 
     @staticmethod
     def _hook_changed_output(self,recOld,recNew):
-        for k in recOld['output_snapshot']:
-            v1 = recOld['output_snapshot'][k]
-            v2 = recNew['output_snapshot'][k]
-            if v1!=v2:
-                print(self,k,v1,v2)
+        # for k in recOld['output_snapshot']:
+        #     v1 = recOld['output_snapshot'][k]
+        #     v2 = recNew['output_snapshot'][k]
+        #     if v1!=v2:
+        #         print(self,k,v1,v2)
         raise self.ChangedOutputError("output for %s has changed since snapshot"%self)
 
 
@@ -61,6 +63,8 @@ class MasterNode(AbstractNode):
                 changed_self = recOld['self'] != recNew['self']
                 changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
                 changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
+                if self.DEBUG_SOURCE_CHANGE and changed_self:    
+                    print (dumper._dumps([recOld.get('meta'),recNew.get('meta') ]))
                 if changed_output:
                     self._hook_changed_output(self, recOld,recNew)
                 # print("[CHANGED_DIFF](%s,%s,%s),%s%s"%(changed_self,changed_input,changed_output,self,self.index,))
@@ -69,7 +73,13 @@ class MasterNode(AbstractNode):
             else:
                 # print("[CHANGED_SAME]%s%s"%(self.index,self))
                 changed_self, changed_input, changed_output = 0,0,0
+
         changed_input = 0
+        if self.DEBUG_CHANGE_TUPLE:
+            print("[CHANGED_TUPLE](%d,%d,%d),%s"%(changed_self,changed_input,changed_output, self.recordId))
+            # self,self.index,))
+        # print(changed)
+        # (changed_self,changed_input,changed_output)
         return (changed_self,changed_input,changed_output)
     def get_source(self):
         return  self._get_func_code(self.func)
@@ -92,6 +102,7 @@ class MasterNode(AbstractNode):
 
 
 class SlaveNode(AbstractNode):
+# class SlaveNode(object):
     class DanglingSlaveError(Exception):
         pass
 
@@ -115,6 +126,17 @@ class SlaveNode(AbstractNode):
     @property
     def changed_upstream(self):
         return self.master.changed_upstream
+
+    @property
+    def changed_safe(self):
+        # assert 0
+        return self.master.changed_safe
+    @property
+    def changed_upstream_safe(self):
+        # assert 0
+        # print(s)
+        return self.master.changed_upstream_safe
+
     @property
     def called_value(self,):
         if not self.master.running:
@@ -160,11 +182,11 @@ class AutoMasterNode(MasterNode):
     #     pass
     # ChangedOutputError = ChangedSelfError
     def _hook_changed_output(self,recOld,recNew):
-        for k in recOld['output_snapshot']:
-            v1 = recOld['output_snapshot'][k]
-            v2 = recNew['output_snapshot'][k]
-            if v1!=v2:
-                print(self,k,v1,v2)        
+        # for k in recOld['output_snapshot']:
+        #     v1 = recOld['output_snapshot'][k]
+        #     v2 = recNew['output_snapshot'][k]
+        #     if v1!=v2:
+        #         print(self,k,v1,v2)        
         raise self.ChangedSelfError(self)
 
     def _get_called_value(self,*a,**kw):

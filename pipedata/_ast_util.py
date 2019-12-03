@@ -22,12 +22,17 @@ class RemoveConst(NodeTransformer):
         else:
             return x
         # return ast.AST()
-#     def visit(self,x):
-# #         return
-# #         if x.lineno:
-# #         if getattr(x, 'lineno',None) is not None:
-#             del x.lineno
-#             del x.col_offset
+
+def get_entryline(source):
+    exprs = ast.parse(source).body
+    for x in exprs:
+        if isinstance(x,ast.If):
+            if ast.dump(x.test) == "Compare(left=Name(id='__name__', ctx=Load()), ops=[Eq()], comparators=[Str(s='__main__')])":
+                # print (x.lineno,x.col_offset)
+                x = x.test
+                # print (x.lineno,x.col_offset)
+                return x.lineno -1
+    return -1
         
 def ast_proj(source):
     x = ast.parse(textwrap.dedent(source),mode='exec')

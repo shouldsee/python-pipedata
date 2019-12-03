@@ -113,6 +113,8 @@ Value is already specified in [TBI]
 
 
 class IndexNode(object):
+    # def DEBUG_INEDX_FLUSH(self):
+    DEBUG_INDEX_FLUSH_QUEUE = 0
     @property 
     def node_dict(self):
         return self._node_dict
@@ -135,14 +137,26 @@ class IndexNode(object):
     def index_file_update(self, key, value):
         self.update_queue[key] = value
         return (key,value)
+
     def index_file_flush(self, ):
+        # assert self.sync
+        ### flush all index
+            
+        [ [remote_index.index_file_flush(),
+            sys.stdout.write('[REMOTE_INDEX_FLUSH]%s\n'%remote_index)] 
+            for remote_index in self.remote_index_set]
+
+        if self.DEBUG_INDEX_FLUSH_QUEUE:
+            print("[FLUSHING_INDEX]%s%s"%(self.path,
+             dumper._dumps([(k,v.get('meta',{})) for k,v in self.update_queue.items()])))
+        
         fname = self.path
         with FileLock( fname +'.lock') as lock:
             d = self.records_cached.copy()
             d.update( self.update_queue )
-            print("[FLUSHING_INDEX]",self.path)
             with open(fname,"wb") as f:
                 f.write(dumper._dumps(d))
+
 
 
     @cached_property
@@ -183,24 +197,55 @@ class IndexNode(object):
         return dest
 
     def main(index):
+        print('START' + 20*"-")
         argv = sys.argv
+        verbose = '--verbose' in argv 
         if '--changed' in argv:
             del argv[argv.index('--changed')]
             for k,v in index.node_dict.items():
-                changed,err = v.changed_safe()
+                changed,err = v.changed_safe
                 if err is None:
                     err = ''
-                print('\t'.join(("[CHANGED=%d]"%changed, k, v.__class__.__name__, repr(err), v.index.realpath(), )))
+                if verbose>=1:
+                    print('\t'.join(("[CHANGED=%s]"%changed, k, v.__class__.__name__, repr(err), v.index.realpath(), )))
+                else:
+                    print('\t'.join(("[CHANGED=%s]"%changed, k, v.__class__.__name__, )))
                 # print("[CHANGED=%d]"%v.changed_safe(),k,v, )
+        elif '--changed-upstream' in argv:
+            for k,v in index.node_dict.items():
+                changed_upstream = v.changed_upstream_safe
+                # err = None
+                # if err is None:
+                #     err = ''
+                if verbose>=1:
+                    print('\t'.join((
+                        "[CHANGED_UPSTREAM=%s]"%(int(bool(changed_upstream))),
+                        k,
+                         repr(changed_upstream), 
+                         v.__class__.__name__,  
+                         v.index.realpath(), )))
+                else:
+                    changed_upstream = [x.recordId for x,e in changed_upstream]
+                    print('\t'.join((
+                        "[CHANGED_UPSTREAM=%s]"%(int(bool(changed_upstream))),
+                         k,
+                         repr(changed_upstream), 
+                         v.__class__.__name__,  
+                         # v.index.realpath(), 
+                         )))                        
+            return
         else:
             index.sync()
-    def sync(index):
-        # elif :
-            print('START' + 20*"-")
-            [x() for x in index.node_dict.values()]
-            index.index_file_flush()
-            print('END' + 20*"-")
+        print('END' + 20*"-")
 
+    @property
+    def remote_index_set(index):
+        return  set( x.remote_node.index for x in index.node_dict.values() if hasattr(x,'remote_node'))
+        
+    def sync(self):
+        with self.realpath().dirname():
+            [x() for x in self.node_dict.values()]
+        self.index_file_flush()
 
     def collect_static(self):
         print()

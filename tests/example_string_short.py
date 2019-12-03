@@ -84,6 +84,18 @@ def make_combined( self, (out5, out10, out15,), ):
          map(f.write,lines)
     return 1
 
+# @MasterNode.from_func(index,
+#     {
+#     "OUT":SlaveFile(index,"repeats.txt"),
+# })
+# def make_repeats( self, (letterFile,dummyFile, ), ):
+#     lines = []
+#     [ lines.extend(list(
+#         open(x()['OUT'].path,'r'))) for x in [out5, out15, ]]
+#     with open(self['OUT']().path,'w') as f:
+#         map(f.write,lines)
+#     return 1
+
 
 if __name__ == '__main__':
     index.main()

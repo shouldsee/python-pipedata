@@ -2,12 +2,14 @@ set -e
 
 # python $PWD/tests/test_all.py "$@"
 
-pip2 install . --user
-find . -name "*.index" -delete
+#pip2 install . --user
+#find . -name "*.index" -delete
+
 python2 $PWD/tests/test_all.py 
 python2 $PWD/tests/test_all.py MigrationCase.test_migrate 
 python2 test_build/stage3/pipe.py 
 python2 test_build/stage3/pipe.py 
+
 # # find . -name "*.index" -d
 # python2 $PWD/tests/test_all.py 
 # python2 $PWD/tests/test_all.py MigrationCase.test_migrate 

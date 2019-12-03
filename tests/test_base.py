@@ -35,20 +35,21 @@ class PipeRunner(object):
             fname
         self.key = key
         key = self.key
-        # import pipedata.base as pipedata
-        # imp.reload(pipedata)
         fname = os.path.realpath(fname)
-
-#         reload(pipedata) ### class attributes would otherwise be kept  e.g. InputTrackedFile.counter
         linecache.checkcache(fname) #### otherwise one cannot reliably
-#         assert 0,linecache.checkcache(fname)
         self.pipe = pipe =  imp.load_source( key, fname)
-        # pipe.IndexedDiffFileError = IndexedDiffFileError
-        # pipe.IndexedMissingFileError = IndexedMissingFileError
-        # pipe.ChangedNodeError = ChangedNodeError        
     def __call__(self,*a,**kw):
         pipe_run(self.pipe.index)
         return self.pipe.index
+                
+        # import pipedata.base as pipedata
+        # imp.reload(pipedata)
+#         reload(pipedata) ### class attributes would otherwise be kept  e.g. InputTrackedFile.counter
+#         assert 0,linecache.checkcache(fname)
+        # pipe.IndexedDiffFileError = IndexedDiffFileError
+        # pipe.IndexedMissingFileError = IndexedMissingFileError
+        # pipe.ChangedNodeError = ChangedNodeError        
+
     
 
 def _dbg():

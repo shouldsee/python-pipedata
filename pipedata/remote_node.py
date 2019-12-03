@@ -69,23 +69,7 @@ class RemoteNode(MasterNode):
                 ("remote_record",self.remote_node.as_snapshot()),
                 ])
         rec['output_snapshot'] = []
-        # rec.update(
-        #     [
-        #         ("self_remote_path" , self.remote_path),
-        #         ("self_remote_name" , self.remote_name),
-        #         ("self_remote_record",self.remote_node.as_snapshot()),
-        #     # ('input_snapshot',
-        #     #     [
-        #     #     ("remote_path" , self.remote_path),
-        #     #     ("remote_name" , self.remote_name),
-        #     #     ("remote_record",self.remote_node.as_snapshot()),
-        #     #     ]
-        #     # ),
 
-        #     ('output_snapshot',
-        #         []),
-        #     ]
-        #     )
         return rec
 
     # @property
