@@ -13,7 +13,7 @@ pip2 install https://github.com/shouldsee/python-pipedata/tarball/master --user
 ### Test
 
 ```bash
-python2 test.py
+bash test.sh
 ```
 ### To-Do
 
