@@ -22,6 +22,12 @@ import shutil
 
 from pipedata._ast_util import ast_proj
 
+try:
+    from IPython.lib.pretty import pretty
+except:
+    def pretty(ob):
+        return json.dumps(ob,indent=4,default=repr)
+
 def file_not_empty(fpath):  
     '''
     Source: https://stackoverflow.com/a/15924160/8083313
@@ -77,19 +83,28 @@ class cached_property(object):
 def _open(*a):
     assert isinstance(a[0])
 
-# class BaseFile(object):
-#     _DEBUG = _DEBUG
-#     DEBUG_NO_CACHE = 0
-#     VERBOSE = 0
-#     def __repr__(self,):
-#         return "%s(%r)"%(self.__class__.__name__,self.path)
 
-#     def __call__(self,*a,**kw):
-#         return self
-#     def __init__(self, path):
-#         self.path=path
-#     def open(self,*a, **kw):
-#         return open(self.path,*a, **kw)
+def st_time_size(st):
+    return (st.st_mtime, st.st_size)
+
+
+
+
+class IndexedMissingFileError(Exception):
+    '''
+    index_absent=0, file_absent=1
+    suppress if the hooks not enabled
+    '''
+    pass
+class IndexedDiffFileError(Exception):
+    '''
+    index_absent=0, file_absent=1
+    suppress if the hooks not enabled
+    '''
+    pass
+
+
+
 def _dbgf():        
     import pdb,traceback
     print(traceback.format_exc())
@@ -110,20 +125,27 @@ class IndexNode(object):
         return "%s(path=%r)"%(self.__class__.__name__, str(self.path))
     def __init__(self,path = None, frame=None):
         frame = frame__default(frame)
+
         self._symbolicRootNode = SymbolicRootNode(
-            self,lambda self:[x() for x in self.input_kw.values()], 
-            _dict(), _dict(),0,frame,1,'_symbolicRootNode', None,) 
-        self._symbolicOutputNode = SymbolicOutputNode(
-            self,
-            lambda self:[x() for x in self.input_kw.values()],
-        _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None, )
+            self, lambda :None, _dict(),_dict(), None)
+        ##### outputNode not enabled
+        # self._symbolicOutputNode = AbstractNode(
+        #     self, lambda :None, _dict(),_dict(), "_symbolicOutputNode")
+        # self._symbolicOutputNode = SymbolicOutputNode(
+        #     self,
+        #     lambda self:[x() for x in self.input_kw.values()],
+        # _dict(), _dict(),0,frame,1,'_symbolicOutputNode',None, )
         self._symbolicInputNode = RawNode(
             self, lambda self:None,
         _dict(), _dict(),0,frame,1,'_symbolicInputNode',None,)  
         if path is None:
             path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
+
         self.path = Path(path).realpath()
         self.update_queue = _dict()
+    @property
+    def _root(self):
+        return self._symbolicRootNode
 
     def realpath(self):
         return self.path
@@ -186,37 +208,6 @@ class IndexNode(object):
 
 
 
-def st_time_size(st):
-    return (st.st_mtime, st.st_size)
-
-# class _parent(object):
-#     def __init__(self):
-#         self.path = None
-
-# def index_get_default(frame=None):
-#     frame = frame__default(frame)
-#     # parent = object()
-#     parent = _parent()
-#     parent.path = frame.f_locals['__file__'].replace('.pyc','.py')+'.index'
-#     # parent = BaseFile(frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
-#     # print parent.path
-#     return parent
-
-
-
-class IndexedMissingFileError(Exception):
-    '''
-    index_absent=0, file_absent=1
-    suppress if the hooks not enabled
-    '''
-    pass
-class IndexedDiffFileError(Exception):
-    '''
-    index_absent=0, file_absent=1
-    suppress if the hooks not enabled
-    '''
-    pass
-
 
 def NodeFromFunc(*a,**kw):
     return RawNode.from_func(*a,**kw)
@@ -226,7 +217,245 @@ class _INIT_VALUE(object):
 class ChangedNodeError(Exception):
     pass
 returned =  _INIT_VALUE()
-class RawNode(object):
+
+class AbstractNode(object):
+    force_index_update = 0 
+    def __init__(self, index, func, input_kw, output_kw, name):
+        assert not input_kw,"input_kw should be extracted from the function"
+        if name is not None:
+            func.__name__ = name
+        self.func_orig = func
+        self._level_stream = {self,}
+        self.init_output_kw = output_kw
+        self.index = self.indexFile = index
+        self._attach_to_root()
+
+    def __call__(self,*a,**kw):
+        return self.called_value
+
+    def as_record(self):
+        assert 0 ,"TBI"
+        # raise Exception("Not initialised")
+    def as_snapshot(self):
+        return self.as_record()
+
+    @cached_property
+    def _changed(self):
+        assert 0,"TBI"
+
+    def recordId(self):
+        assert 0,"TBI"
+
+
+    @property
+    def name(self):
+        return self.func.__name__
+        pass
+
+    @property
+    def func(self,):
+        return self.func_orig
+
+    def _get_func_code(self, func):
+        linecache.checkcache( self.index.path.replace('.py.index','.py'))
+        # func.__module__.__file__)
+        return  inspect.getsource(func)
+
+    def get_record(self):
+        return self.index.get_record( self.recordId, None)        
+
+    def _index_update(self):
+        # print ("[UPDATING_INDEX]%s"%self,)
+        return self.index.index_file_update( self.recordId, self.as_record())
+
+    def index_update(self):
+        return [x._index_update() for x in self.level_stream]
+
+    # def index_update(self):
+    #     return self._index_update()
+
+    @property
+    def level_stream(self,):
+        return self._level_stream
+
+    def merge(self,other):
+        self._level_stream.update(other._level_stream)
+        other._level_stream.update(self._level_stream)
+        other._level_stream = self._level_stream
+        return self
+
+
+    @property
+    def changed(self):
+        self.initialised_tuples ## lookup upsteram and downstream
+        return any([ x._changed for x in self.level_stream])
+
+    @cached_property
+    def changed_upstream( self,):
+        self.input_kw
+        return [x for x in self.input_kw.values() if any([ x.changed_upstream, x.changed])]
+
+
+
+    @cached_property
+    def called_value(self,*a,**kw):
+        '''
+        #### evalutaion of value/sideeffects
+        Core functionality to make  
+        '''
+        if self.changed_upstream:
+            for x in self.input_kw.values():
+                with x.index.realpath().dirname():
+                    x.called_value
+            # [ x.called_value for x in self.input_kw.values() ]
+        if any([self.changed_upstream,self.changed]): 
+            print("RUNNING:%s"%self)
+            input_kw, output_kw = self.initialised_tuples
+            args = inspect.getargspec(self.func)[0]
+            self.returned = self.func(*([x[1] for x in zip(args, (self, input_kw.values(), output_kw.values() ))]) )
+            self.runned = 1
+        else:
+            self.runned = 0
+
+        # if self.runned or self.force_index_update:
+        if self.runned:
+            _ = '''
+            Once running is complete, trigger an update to index file
+            '''
+            self.index_update()
+            self.index_updated = 1
+        else:
+            self.index_updated = 0
+            pass
+            # [x.index_update() for x in self.output_kw.values()]
+        self.committed = 1
+        return self
+
+
+
+    ###### initialisation of graph
+    def _init_func(self, d=None, skip =1):
+        f = self.func
+        if d is None:
+            d = self._root.input_kw
+            # d = frame__default(frame).f_locals
+        else:
+            pass
+            # assert frame is None
+        (args, varargs, keywords, defaults) = inspect.getargspec(self.func)
+        defaults = defaults or () ## this is for kwargs
+
+        self, input, output = args + ( 3 - len(args) ) * [(),]
+        input_kw = _dict([ (key,d[key])  for key in input])
+        output_kw = _dict([ (key,d[key])  for key in output])
+        return input_kw,output_kw
+
+
+    @cached_property
+    def initialised_tuples(self):
+        ### fill default and add decorate to return output_kw
+        # self.func = self.func_orig
+
+        input_kw,output_kw = self._init_func()
+        self.func.__defaults__ = ( input_kw.values(), output_kw.values())
+        # _dec(self.func)
+        if output_kw:
+            assert not self.init_output_kw,"Decorator must be empty if the 3rd argument exists of funcion %s" % self.func.func_code
+            output_kw = output_kw
+        else:
+            output_kw = self.init_output_kw
+        self._level_stream.update( output_kw.values() )
+        return input_kw,output_kw
+
+    @property
+    def output_kw(self):
+        input_kw,output_kw = self.initialised_tuples
+        return output_kw
+    @property
+    def input_kw(self):
+        input_kw,output_kw = self.initialised_tuples
+        return input_kw
+
+    def _attach_to_root(self,):
+        # frame = frame__default(frame)
+        self._root = self.indexFile._symbolicRootNode
+        # self._root = _root = frame.f_locals['_symbolicRootNode']
+        self._root.input_kw[ self.name ] = self
+
+
+
+class MasterNode(AbstractNode):
+    @property
+    def recordId(self):
+        return self.name
+    def __getitem__(self,key):
+        return self.output_kw[key]
+
+    def __init__(self, index, func, input_kw, output_kw, force, name, ):
+        super(self.__class__, self).__init__( index, func, input_kw, output_kw, name)
+
+    @classmethod
+    def from_func(cls, index, output_kw = {}, force=0,name = None ):
+        def _dec(func):
+            input_kw = {}
+            self = cls(index, func, input_kw, output_kw, force, name)
+            return self        
+        return _dec        
+
+
+    @property
+    def _changed(self):
+        return self._changed_tuple[0]
+    @property
+    def changed_upstream(self):
+        return self._changed_tuple[1]
+    def _hook_changed_record(self, changed_code,changed_input):
+        return 
+    @cached_property
+    def _changed_tuple(self):    
+        recOld = self.get_record()
+        recNew = self.as_record()
+        recs = [recOld,recNew]
+        if recOld is None:
+            print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
+            # self._hook_noindex()
+            changed_code, changed_input = 1,1
+        else:
+            if recOld != recNew:
+                diff = _dict()
+                trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
+                changed_code = trees[0] != trees[1]
+                changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
+                print("[CHANGED_DIFF]%s%s"%(self.index,self))
+                changed_code, changed_input
+                self._hook_changed_record( changed_code, changed_input)
+            else:
+                print("[CHANGED_SAME]%s%s"%(self.index,self))
+                changed_code, changed_input = 0,0
+
+        return changed_code,changed_input
+    def as_snapshot(self):
+        return _dict([
+        ('class', self.__class__.__name__),
+        ('sourcelines', self._get_func_code(self.func).splitlines()),
+        ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
+        ])
+        return self.as_record()
+    def as_record(self,):
+        return _dict([
+        ('class', self.__class__.__name__),
+        ('sourcelines', self._get_func_code(self.func).splitlines()),
+        ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
+        ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
+
+        ])
+class SlaveNode(AbstractNode):
+    pass
+    # def _changed(self):
+
+
+
+class RawNode(AbstractNode):
     '''
     Decorate a function by
         filling the positional arguments
@@ -247,64 +476,37 @@ class RawNode(object):
     _root = None
 
 
+
+
+    @property
+    def recordId(self):
+        return self.name
+
+    @property
+    def func(self):
+        return self.func_orig
+
     def __repr__(self):
-        return '<Node with func:%s%s>' % (self.f.__name__, 
+        return '<Node with func:%s%s>' % (self.func.__name__, 
                 ':tag:%s'% self.tag if self.tag else '')
     def __getitem__(self,key):
         return self.output_kw[key]
 
-    def __call__(self,*a,**kw):
-        return self.called_value
     
     def __init__(self, index, func, input_kw, output_kw, force, frame, skip, name, tag, ):
         # input_kw = None
         # output_kw = None
         frame = frame__default(frame)
-        if name is not None:
-            func.__name__ = name
         if output_kw is None:
             output_kw = _dict()
-
-        self.func_orig = func
-        # self.func_orig_source = _get_func_source(func)
-        self.f = func
         self.tag = tag
-        # self.input_kw = input_kw  or _dict()
-        self.init_output_kw = output_kw
         self.force = force
-        # self._frame = 
-        # self.indexFile = frame.f_locals['_indexFile']
-        self.index = self.indexFile = index
-        self._attach_to_root(frame)
-        self._level_stream = {self,}
-        # print(self,self.level_stream)
-        # self._attach_func(func, frame, skip)
-        # del self._frame
-        return 
+        super( RawNode,self).__init__( index, func, {}, output_kw, name)
 
-    @property
-    def recordId(self):
-        return self.name
-    def func(self,*a,**kw):
-        raise Exception("Not initialised")
 
-    @property
-    def level_stream(self,):
-        return self._level_stream
-        # return list(self._level_stream)
+    def index_update(self):
+        return [x._index_update() for x in self.level_stream]
 
-    def merge(self,other):
-        self._level_stream.update(other._level_stream)
-        other._level_stream.update(self._level_stream)
-        other._level_stream = self._level_stream
-        return self
-
-    @property
-    def changed(self):
-        # with self.index.path.dirname() as cwd:
-            # print([ sys.stdout.write("%s\n"%[x._changed, x])for x in self.level_stream])
-        self.initialised_tuples ## lookup upsteram and downstream
-        return any([ x._changed for x in self.level_stream])
 
     @cached_property
     def _changed(self):
@@ -323,7 +525,7 @@ class RawNode(object):
         if self._changed_code()[0]:
             print( "CHANGED_CODE:%s,%s"%(self.index,self))
             return 1
-            
+
         if self._changed_output():
             assert 0,"This should be obsolete and never called" 
             print( "CHANGED_OUTPUT:%s,%s"%(self.index,self))
@@ -335,17 +537,7 @@ class RawNode(object):
         return 0
 
 
-    @cached_property
-    def changed_upstream( self,):
-        self.input_kw
-        # it = self.input_kw.values()
-        # for x in it:
-        #     print self, x, x.changed_upstream,x.changed
-        # print (self,zip([x.changed for x in it],it)
-        return [x for x in self.input_kw.values() if x.changed_upstream or x.changed]
 
-    # def _changed_upstream(self):
-    #     return self._changed_upstream_cache
 
     def _changed_output(self):
         lst = []
@@ -459,72 +651,8 @@ class RawNode(object):
         assert 0
 
 
-    # @staticmethod
-    def _decorate_change_output(self,f):
-        @decorator
-        def _dec(f, *a,**kw):
-            '''
-            Decorate a function 
-            return output_kw instead of original value
-            `return None` <==> `self.output_kw["return_value"] = None`
-            '''
-            # okw['returned'] = f( *a, **kw)
-            self.returned = f( *a, **kw)
-            # return okw            
-            return self     
-
-        return  _dec(f)
-
-    def _attach_func(self, func, frame, skip):
-        assert 0
-
-    # @cached_property
-    @property
-    def input_kw(self):
-        input_kw,output_kw = self.initialised_tuples
-        return input_kw
-    # @property
-    # def output_kw(self)
-    #     input_kw,output_kw = self.initialised_tuples
-    #     return output_kw
-    @property
-    def func(self):
-        return self.func_orig
-    
-    def _init_func(self, d=None, skip =1):
-        f = self.func
-        if d is None:
-            d = self._root.input_kw
-            # d = frame__default(frame).f_locals
-        else:
-            pass
-            # assert frame is None
-        (args, varargs, keywords, defaults) = inspect.getargspec(f)
-        defaults = defaults or () ## this is for kwargs
-
-        self, input, output = args + ( 3 - len(args) ) * [(),]
-        input_kw = _dict([ (key,d[key])  for key in input])
-        output_kw = _dict([ (key,d[key])  for key in output])
-        f.__defaults__ = ( input_kw.values(), output_kw.values())
-        return input_kw,output_kw
-
-    @cached_property
-    def initialised_tuples(self):
 
 
-        ### fill default and add decorate to return output_kw
-        # self.func = self.func_orig
-
-        input_kw,output_kw = self._init_func()
-        # _dec(self.func)
-        if output_kw:
-            assert not self.init_output_kw,"Decorator must be empty if the 3rd argument exists of funcion %s" % self.func.func_code
-            self.output_kw = output_kw
-        else:
-            self.output_kw = self.init_output_kw
-        self._level_stream.update( self.output_kw.values() )
-
-        return input_kw,output_kw
 
     @classmethod
     def from_func(cls, index, output_kw=None, input_kw=None,force=0,frame=None,skip=1, name =None, tag = None):
@@ -540,69 +668,11 @@ class RawNode(object):
         
         return _dec        
 
-    @property
-    def name(self):
-        return self.f.__name__
 
-    def _attach_to_root(self,frame=None):
-        frame = frame__default(frame)
-        self._root = self.indexFile._symbolicRootNode
-        # self._root = _root = frame.f_locals['_symbolicRootNode']
-        self._root.input_kw[ self.name ] = self
 
-        pass
-    def _get_func_code(self, func):
-        linecache.checkcache( self.indexFile.path.replace('.py.index','.py'))
-        # func.__module__.__file__)
-        return  inspect.getsource(func)
 
-    @cached_property
-    def called_value(self,*a,**kw):
-        # with self.index.path.dirname() as cwd:
-        if self.changed_upstream:
-            for x in self.input_kw.values():
-                with x.index.realpath().dirname():
-                    x.called_value
-            # [ x.called_value for x in self.input_kw.values() ]
-        if any([self.changed_upstream,self.changed]): 
-            print("RUNNING:%s"%self)
-            input_kw, output_kw = self.initialised_tuples
-            args = inspect.getargspec(self.func)[0]
-            self.returned = self.func(*([x[1] for x in zip(args, (self, input_kw.values(), output_kw.values() ))]) )
-            self.runned = 1
-        else:
-            self.runned = 0
 
-        if self.runned or self.force_index_update:
-            _ = '''
-            Once running is complete, trigger an update to index file
-            '''
-            [x.index_update() for x in self.level_stream]
-            self.index_updated = 1
-        else:
-            self.index_updated = 0
-            pass
-            # [x.index_update() for x in self.output_kw.values()]
-        # self.runned = runned
-        self.committed = 1
-        return self
-
-    def get_record(self):
-        return self.index.get_record( self.recordId, None)        
-    @property
-    def recordId(self):
-        return self.name
-    def _index_update(self):
-        # print ("[UPDATING_INDEX]%s"%self,)
-        return self.index.index_file_update( self.recordId, self.as_record())
-    def index_update(self):
-        val = self._index_update()
-        self._hook_post_index_update(val)
-        return val
-    def _hook_post_index_update(self, indexData):
-        pass
-
-    def as_record(self):
+    def as_record(self, ):
         src = self._get_func_code(self.func_orig)
 
         return _dict(data=_dict([
@@ -711,27 +781,11 @@ class TrackedFile(RawNode):
             # ,states
             # return (0,"SAME")
     def as_record(self, ):
-        stat_result =os.stat(self.realpath())
+        # stat_result =os.stat(self.realpath())
+        stat_result =os_stat_safe(self.realpath())
         # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime,))
         return dict(stat_result = stat_result)
 
-    # def index_update(self,):
-
-    #     stat_result =os.stat(self.path)
-    #     print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime))
-    #     # if not file_not_empty(self.path):
-    #     #     path.Path(self.path).dirname()
-    #     #     os.path.makedirs_p()
-    #     return self.index.index_file_update( 
-    #         self.path, 
-    #         dict(stat_result = stat_result)
-    #     )
-
-
-        # val,states  = self._changed
-        # if self.VERBOSE:
-        #     print("[CheckingChange]:{self.path}.changed={val}.state={states}".format(**locals()))
-        # return val
 
     
 #####################
@@ -739,42 +793,7 @@ class TrackedFile(RawNode):
 
 class TrackedFileNode(TrackedFile):
     pass
-    # def __init__(self,  index,  path,  input_func=None, parent=None,frame=None, nodeClass = None , force = 0, skip=1, name=None):
-    #     if nodeClass is None:
-    #         nodeClass = AutoNode
-    #     frame = frame__default(frame)
-    #     # import traceback
-    #     # traceback.print_stack()
-    #     # print self.get_node_name(name)
-    #     if input_func is None:
-    #         input_func = lambda self, (_symbolicInputNode,):None
-    #     self.node = nodeClass(
-    #         index,
-    #         input_func, 
-    #         input_kw = _dict(), output_kw= _dict(), force=force,
-    #         frame = frame, skip=skip,
-    #         name = self.get_node_name(name),
-    #         tag = path,
-    #          # path.replace(),
-    #         )
-    #     self.node.path = path
 
-
-    # def get_node_name(self,name):
-    #     return name
-
-
-    # @property
-    # def changed_upstream(self):
-    #     return self.node.changed_upstream
-
-    # def __call__(self):
-    #     return self.called_value
-
-    # @property
-    # def called_value(self):
-    #     return self
-    #     # return self.node.called_value
 
 
 class InputTrackedFile(TrackedFile):
@@ -827,6 +846,48 @@ def list_flatten_totype(lst, typ, strict=1,):
 
 
 
+
+class AutoNode(RawNode):
+    pass
+
+
+class SymbolicRootNode(AbstractNode):
+
+    def _attach_to_root(self,frame=None):
+        '''
+        Do not attach outputNode  to itself
+        '''
+        self._root = self
+        pass
+
+    @cached_property
+    def input_kw(self):
+        return _dict()
+
+# def SymbolicOutputNodeFunc(self): retrun [x() for x in self.input_kw.values()]
+class SymbolicOutputNode(AutoNode):
+    def _changed(self):
+        return len(self.changed_upstream)
+        # return self._input_kw
+    
+    
+    # def _attach_to_symout(self,frame=None):
+    #     '''
+    #     Do not attach outputNode  to itself
+    #     '''
+    #     pass
+
+
+# class SymbolicInputNode(RawNode):
+#     pass
+
+
+'''
+---------------------------------------
+Graveyard ahead
+--------------------------------------
+'''
+
 def _get_func_code(func):
     del func.__doc__
     code = func.__code__
@@ -854,46 +915,3 @@ def _get_func_code(func):
     # return _code
 
 
-
-
-class AutoNode(RawNode):
-    pass
-
-
-class SymbolicRootNode(AutoNode):
-
-    def _attach_to_root(self,frame=None):
-        '''
-        Do not attach outputNode  to itself
-        '''
-        self._root = self
-        pass
-
-    @cached_property
-    def input_kw(self):
-        return _dict()
-
-# def SymbolicOutputNodeFunc(self): retrun [x() for x in self.input_kw.values()]
-class SymbolicOutputNode(AutoNode):
-    # @property
-    def _changed(self):
-        return len(self.changed_upstream)
-        # return self._input_kw
-    
-    
-    # def _attach_to_symout(self,frame=None):
-    #     '''
-    #     Do not attach outputNode  to itself
-    #     '''
-    #     pass
-
-
-# class SymbolicInputNode(RawNode):
-#     pass
-
-
-'''
----------------------------------------
-Graveyard ahead
---------------------------------------
-'''

@@ -61,11 +61,18 @@ class PipeRunner(object):
 def _dbg():
     import inspect
     pr = PipeRunner('pipe','pipe.py')
-    f = pr.pipe.out10.f
-    _code = f.__code__
+    # f = pr.pipe.out10.f
+    # _code = f.__code__
     print (_code.co_code.__repr__())
     print (_code.co_consts.__repr__())
     print (inspect.getsource(f))
+def _dbgf():        
+    import pdb,traceback
+    print(traceback.format_exc())
+    import traceback
+    traceback.print_stack()
+    traceback.print_exc()
+    pdb.set_trace()        
 
 class SharedCases(object):
     _realpath = path.Path(__file__).dirname().dirname().realpath()
@@ -191,7 +198,9 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
             def getPr():
                 pr =  PipeRunner('pipe','pipe.py')
-                pr.pipe.RawNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
+                # pr.pipe.MasterNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
+                pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
+                    _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
                 return pr
 
             with open("pipe.py",'a+') as f:
@@ -200,7 +209,7 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
 
 ### changed 10 to 25
-@RawNode.from_func(index,{
+@MasterNode.from_func(index,{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -224,7 +233,7 @@ def out10(  self, (numberFile, letterFile),):
                 f.write(r'''
 ### add dependency on dummy file
 dummyFile = InputTrackedFile(index,'test-dummy.txt')
-@RawNode.from_func(index,{
+@MasterNode.from_func(index,{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -245,13 +254,13 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
             pass
         def getPr():
             pr =  PipeRunner('pipe','pipe.py')
-            pr.pipe.RawNode._hook_indexed_diff_file = lambda self:_raise(myError("%s"%self))
+            pr.pipe.MasterNode._hook_indexed_diff_file = lambda self:_raise(myError("%s"%self))
             return pr        
         
         with path.Path(self.test_init()).makedirs_p() as d:
             with open("pipe.py",'a+') as f:
                 f.write(r'''
-@RawNode.from_func(index,{{
+@MasterNode.from_func(index,{{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 }})
 def out10(  self, (numberFile, letterFile),):
@@ -300,7 +309,7 @@ def out10(  self, (numberFile, letterFile),):
 #             return
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            # pipe.RawNode.OLD = 0
+            # pipe.MasterNode.OLD = 0
 
 #             pipe.TrackedFile.VERBOSE = 0
 #             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
@@ -314,7 +323,7 @@ def out10(  self, (numberFile, letterFile),):
             
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            # pipe.RawNode.OLD = 0
+            # pipe.MasterNode.OLD = 0
             pipe.TrackedFile.VERBOSE = 0
             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
             
