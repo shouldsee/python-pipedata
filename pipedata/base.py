@@ -452,7 +452,6 @@ class MasterNode(AbstractNode):
         ('sourcelines', self._get_func_code(self.func).splitlines()),
         ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
-
         ])
 class SlaveNode(AbstractNode):
     pass
