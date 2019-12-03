@@ -18,7 +18,7 @@ def pipe_run(self):
     # nodes = [self._symbolicOutputNode.input_kw]
     # self._symbolicOutputNode()
     # vars(self)
-    [ x() for x in self._symbolicRootNode.input_kw.values()]
+    [ x() for x in self.node_dict.values()]
     # assert 0,self._symbolicRootNode.input_kw
     # print os.path.realpath( self._indexFile.path )
     # for x in  self._symbolicOutputNode.input_kw

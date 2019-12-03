@@ -1,5 +1,6 @@
 set -e
-python $PWD/tests/test_all.py
+
+python $PWD/tests/test_all.py "$@"
 #python test_all.py
 #python2 -m unittest discover -s tests
 #rm -f */*.index && python2 test_all.py Case.test_1 && python2 tests/example_bio.py

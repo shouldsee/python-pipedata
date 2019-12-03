@@ -8,7 +8,6 @@ print ("[indexFile]",index)
 
 _f1 = SelfSlaveFile( index, 'tests-number.txt',name='numberFile')
 _f2 = SelfSlaveFile( index, 'tests-letter.txt',name='letterFile')
-print (index._root.input_kw)
 
 @MasterNode.from_func(index,
     {

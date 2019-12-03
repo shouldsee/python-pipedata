@@ -98,7 +98,7 @@ class SlaveNode(AbstractNode):
         Look up local index for master
         '''
         res = []
-        for x in self._root.input_kw.values():
+        for x in self.index.node_dict.values():
             if self in x.output_kw.values():
                 print (x,)
                 res.append(x)

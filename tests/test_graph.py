@@ -10,8 +10,6 @@ class GraphCase(unittest.TestCase):
         base = self.base
         PipeRunner = base.PipeRunner
 
-        # with base.test_stage2().realpath() as d:
-        # with base.realpath() as d1:
         with (base.test_init()).makedirs_p() as d2:
             base._shell('''
 echo 1024> tests-number.txt

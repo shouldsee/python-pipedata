@@ -149,7 +149,8 @@ class AbstractNode(object):
     def _init_func(self, d=None, skip =1):
         f = self.func
         if d is None:
-            d = self._root.input_kw
+            d = self.index.node_dict
+            # d = self._root.input_kw
             # d = frame__default(frame).f_locals
         else:
             pass
@@ -192,9 +193,11 @@ class AbstractNode(object):
 
     def _attach_to_root(self,):
         # frame = frame__default(frame)
-        self._root = self.indexFile._symbolicRootNode
+
+        # self._root = self.indexFile._symbolicRootNode
         # self._root = _root = frame.f_locals['_symbolicRootNode']
-        self._root.input_kw[ self.name ] = self
+        self.index.node_dict[self.name] = self
+        # self._root.input_kw[ self.name ] = self
 
     class IndexedMissingFileError(Exception):
         '''

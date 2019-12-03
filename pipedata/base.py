@@ -102,29 +102,43 @@ class SymbolicRootNode(object):
     def input_kw(self):
         return _dict()        
 
+# class NodeDict(_dict,object):
+class NodeDict(_dict,):
+    index = "[DETACHED]"
+    @staticmethod
+    def duplicated_key_error(self,  key):
+        msg = '''
+Duplicated key:{key}
+Index: {self.index}
+Value is already specified in [TBI]
+        '''.format(**locals())
+        return self.DuplicatedKeyError(msg)
+
+    def __setitem__(self,key, value):
+        if key in self:
+            raise self.duplicated_key_error(self, key)
+        _dict.__setitem__(self, key,value)
+
+    class DuplicatedKeyError(Exception):
+        pass
+
+
 class IndexNode(object):
-# class Pipeline(object):
     @property 
     def node_dict(self):
-        return self._root.input_kw
+        return self._node_dict
+        # return self._root.input_kw
     def __repr__(self):
         return "%s(path=%r)"%(self.__class__.__name__, str(self.path))
     def __init__(self,path = None, frame=None):
         frame = frame__default(frame)
-
-        self._symbolicRootNode = SymbolicRootNode(
-            self, lambda :None, _dict(),_dict(), None)
-
-
         if path is None:
             path = os.path.realpath( frame.f_locals['__file__'].replace('.pyc','.py')+'.index')
-
         self.path = Path(path).realpath()
+        self._node_dict = NodeDict()
+        self._node_dict.index = self
+         # _dict()
         self.update_queue = _dict()
-
-    @property
-    def _root(self):
-        return self._symbolicRootNode
 
     def realpath(self):
         return self.path

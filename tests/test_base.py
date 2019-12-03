@@ -100,6 +100,7 @@ class SharedCases(object):
         
     def test_init(self):
         dirname = self.test_import('tests/example_string_short.py').index.make_copy("test_build/stage1",name='pipe.py')
+        dirname = dirname.realpath()
         # dirname = se
         with path.Path(dirname) as d:
             print ( self._shell('''
@@ -110,8 +111,9 @@ class SharedCases(object):
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
 #             pipe_run(pipe)
             pipe = PipeRunner('pipe','pipe.py')()
-            print (open(pipe._symbolicRootNode.input_kw['make_combined']['OUT'].path,'r').read()    )
+            print (open(pipe.node_dict['make_combined']['OUT'].path,'r').read()    )
         return dirname
+        
     # def test_init2(self):
 
     def make_index_diff(self):
@@ -221,6 +223,8 @@ return
         with path.Path(self.test_init()).makedirs_p() as d:
             with open("pipe.py",'a+') as f:
                 f.write(r'''
+del index.node_dict["out10"]
+del index.node_dict["tests_out10_txt"]
 @MasterNode.from_func(index,{{
     "OUT":SlaveFile(index,"tests-out10.txt"),
 }})
@@ -281,7 +285,7 @@ SlaveFile(index,"dangling_slave.txt")
 
 #             OLD = 1
             pipe = pr()
-            print (open(pipe._symbolicRootNode.input_kw['make_combined']['OUT'].path,'r').read()    )
+            print (open(pipe.node_dict['make_combined']['OUT'].path,'r').read()    )
             
 #             return
             pr = PipeRunner('pipe','pipe.py')
@@ -297,7 +301,7 @@ SlaveFile(index,"dangling_slave.txt")
             self._shell('''
 touch tests-letter.txt             
 ''')        
-            nodes = pipe.index._symbolicRootNode.input_kw.values()
+            nodes = pipe.index.node_dict.values()
             [node.changed for node in nodes]
 #             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
             [[sys.stderr.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
@@ -305,6 +309,8 @@ touch tests-letter.txt
 #             pr.pipe
 #             print pipe._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read()    
         return dirname
+
+
     def test_level_stream(self):
         import pipedata.types
         reload(pipedata.types)
@@ -314,9 +320,9 @@ touch tests-letter.txt
         # __file__ = 'test_temp.py'
         # frame_init()
         index = IndexNode('__temp.py.index')
-        out5 = SelfSlaveFile(index,"a.txt","tt1")._master
-        File1 = SelfSlaveFile(index,"tests-out5.txt","tt2")._master
-        File2 = SelfSlaveFile(index, "tests-outxx.txt","tt3")._master
+        out5 = SelfSlaveFile(index,"a1.txt",)._master
+        File1 = SelfSlaveFile(index,"b1.txt",)._master
+        File2 = SelfSlaveFile(index, "c1.txt",)._master
         out5.merge(File1)
         out5.merge(File2)
         # File2.merge(out5)
@@ -336,6 +342,26 @@ touch tests-letter.txt
         print (File1.level_stream)
         print (File2.level_stream)
         assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
+
+
+
+    def test_node_dict(self):
+        # import pipedata.types
+        # reload(pipedata.types)
+        # from pipedata.types import TrackedFile, InputTrackedFile
+        from pipedata.types import SelfSlaveFile,NodeDict
+
+        def func():
+            # try:
+            index = IndexNode('__temp.py.index')
+            File1     = SelfSlaveFile(index,"a1.txt",)._master
+            File1_dup = SelfSlaveFile(index,"a1.txt",)._master
+            # except Exception as e:
+            #     print(e)
+            #     raise e
+
+        # func()    
+        self.assertRaises(NodeDict.DuplicatedKeyError, func)
 
 class TrackedDictCases(SharedCases):
 

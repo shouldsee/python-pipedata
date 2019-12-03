@@ -1,5 +1,5 @@
 from pipedata.base import RawNode,TrackedFile,InputTrackedFile,  _dict
-from pipedata.base import IndexNode
+from pipedata.base import IndexNode,NodeDict
 from pipedata.abstract_node import AbstractNode
 
 from pipedata.remote_node import RemoteNode

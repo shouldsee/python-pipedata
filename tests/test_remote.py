@@ -92,7 +92,7 @@ rm tests-out5.txt
             # assert os.getcwdu() == d.realpath(), (os.getcwdu(), )
             index = PipeRunner('pipe','pipe.py')()
             exp = "1024a1024a1024a1024a1024a\n"
-            got = index._symbolicRootNode.input_kw['main'].returned 
+            got = index.node_dict['main'].returned 
             assert got== exp,(got,exp,)
             # tester.assertRaises( base.IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
             pass
