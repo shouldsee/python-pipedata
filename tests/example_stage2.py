@@ -28,7 +28,7 @@ There are two choices here:
   - in order to test for this, alter out5.txt, run the downstream script and check the status of combined.txt
   
 '''
-RemoteNode(index,remote_path='../stage1/pipe.py',remote_name='out5')
+RemoteNode(index, remote_path='../stage1/pipe.py',remote_name='out5')
 
 @MasterNode.from_func(index,)
 def main(s,(out5,),(meta,)):

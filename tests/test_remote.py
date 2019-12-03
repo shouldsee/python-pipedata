@@ -56,7 +56,7 @@ class ThisCase(unittest.TestCase, ):
 echo 123> tests-out5.txt
                             '''))
             assert os.getcwdu() == d.realpath(), (os.getcwdu(), )
-            tester.assertRaises( base.IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
+            tester.assertRaises( base.ChangedOutputError, PipeRunner('pipe','pipe.py'))
             pass
         return
     def test_index_missing(self):
@@ -73,7 +73,7 @@ echo 123> tests-out5.txt
 rm tests-out5.txt
                             '''))
             assert os.getcwdu() == d.realpath(), (os.getcwdu(), )
-            tester.assertRaises( base.IndexedMissingFileError, PipeRunner('pipe','pipe.py'))
+            tester.assertRaises( base.ChangedOutputError, PipeRunner('pipe','pipe.py'))
             pass
         return
 

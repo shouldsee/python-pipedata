@@ -93,17 +93,32 @@ def make_combined( self, (out5, out10, out15,), ):
 
 
 if __name__ == '__main__':
-    from pipedata import index_file_flush
-
-    TrackedFile.VERBOSE=0
     print('START' + 20*"-")
-    symout()
-    print(symout().input_kw['make_combined']['OUT'].open('r').read())
-    index_file_flush()
+    # nodes = [self._symbolicOutputNode.input_kw]
+    # self._symbolicOutputNode()
+    # vars(self)
+    self = index
+    with self.path.dirname():
+        [ x() for x in self._symbolicRootNode.input_kw.values()]
+    # assert 0,self._symbolicRootNode.input_kw
+    # print os.path.realpath( self._indexFile.path )
+    # for x in  self._symbolicOutputNode.input_kw
+    # print( self._symbolicOutputNode().input_kw['make_combined']['OUT'].open('r').read())
+    self.index_file_flush()
     print('END' + 20*"-")
+
+    # from pipedata import index_file_flush
+
+    # TrackedFile.VERBOSE=0
+    # print('START' + 20*"-")
+    # symout()
+    # print(symout().input_kw['make_combined']['OUT'].open('r').read())
+    # index_file_flush()
+    # print('END' + 20*"-")
     
-    import dill
-    dill.dumps(symout)
+    # import dill
+    # dill.dumps(symout)
+
 #     dill.dumps(make_combined)
 #     print symout
     

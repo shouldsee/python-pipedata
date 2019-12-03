@@ -21,6 +21,7 @@ import shutil
 # from _inspect_patch import inspect
 
 from pipedata._ast_util import ast_proj
+from attrdict import AttrDict
 
 try:
     from IPython.lib.pretty import pretty
@@ -34,18 +35,33 @@ def file_not_empty(fpath):
     '''
     return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
 
-@property
-def os_stat_result_null(
-    _null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
-    ):
-    return _null
+# @property
+# def os_stat_result_null(
+#     _null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
+#     ):
+#     os.stat_result(st_mode=33188, st_ino=3567490, st_dev=2053, st_nlink=1, st_uid=1000, st_gid=1000, st_size=2, st_atime=1575340363, st_mtime=1575340597, st_ctime=1575340597)
+#     return _null
 
+_os_stat_result_null = os.stat_result([0 for n in range(os.stat_result.n_sequence_fields)])
 def os_stat_safe(fname):
     if file_not_empty(fname):
         return os.stat(fname)
     else:
-        return os_stat_result_null
+        return _os_stat_result_null
 
+class MyEncoder(json.JSONEncoder):
+    # def s
+    def default(self, o):
+        if isinstance(o, os.stat_result):
+            return {"st_mtime": o.st_mtime, "st_size":o.st_size}
+        else:
+            assert 0,(o,type(o))
+def _dumps(s):
+    return json.dumps(s, cls=MyEncoder,indent=4)
+def _loads(s):
+    return json.loads(s)
+    # dumps(s, cls=MyEncoder )
+        # return o.__dict__   
 # def file_not_empty(fpath):
 #     return os_stat_safe(fpath) != os_stat_result_null
 
@@ -119,6 +135,7 @@ def _dbgfs():
     # traceback.print_stack()
     # traceback.print_exc()
     pdb.set_trace()    
+# import jsonpickle as dill
 class IndexNode(object):
 # class Pipeline(object):
     def __repr__(self):
@@ -160,7 +177,11 @@ class IndexNode(object):
             d.update( self.update_queue )
             print("[FLUSHING_INDEX]",self.path)
             with open(fname,"wb") as f:
-                dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
+                # dill.dump( d, f, )
+                f.write(_dumps(d))
+                # f.write(dill.dumps( d))
+                # , f, )
+                # dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
 
 
         # return _index_file_flush(self.update_queue, self.path)
@@ -169,7 +190,7 @@ class IndexNode(object):
         if file_not_empty( self.path):
             with open( self.path, "rb") as f:
                 # it = ()
-                d = dill.load(f, )
+                d = _loads(f.read(), )
                 # object_pairs_hook=_dict)
         else:
             d = _dict()
@@ -217,9 +238,13 @@ class _INIT_VALUE(object):
 class ChangedNodeError(Exception):
     pass
 returned =  _INIT_VALUE()
+class ChangedOutputError(Exception):
+    # return 
+    pass
 
 class AbstractNode(object):
     force_index_update = 0 
+    tag = None
     def __init__(self, index, func, input_kw, output_kw, name):
         assert not input_kw,"input_kw should be extracted from the function"
         if name is not None:
@@ -243,10 +268,10 @@ class AbstractNode(object):
     @cached_property
     def _changed(self):
         assert 0,"TBI"
-
+    @property
     def recordId(self):
-        assert 0,"TBI"
-
+        return self.name
+        # assert 0,"TBI"
 
     @property
     def name(self):
@@ -388,6 +413,10 @@ class AbstractNode(object):
         self._root.input_kw[ self.name ] = self
 
 
+    def __repr__(self):
+        return '<Node with func:%s%s>' % (self.func.__name__, 
+                ':tag:%s'% self.tag if self.tag else '')
+
 
 class MasterNode(AbstractNode):
     @property
@@ -431,7 +460,15 @@ class MasterNode(AbstractNode):
                 trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
                 changed_code = trees[0] != trees[1]
                 changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
-                print("[CHANGED_DIFF]%s%s"%(self.index,self))
+                changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
+                if changed_output:
+                    for k in recOld['output_snapshot']:
+                        v1 = recOld['output_snapshot'][k]
+                        v2 = recNew['output_snapshot'][k]
+                        if v1!=v2:
+                            print(self,k,v1,v2)
+                    raise ChangedOutputError("output for %s has changed since snapshot"%self)
+                print("[CHANGED_DIFF](%s,%s),%s%s"%(changed_code,changed_input,self,self.index,))
                 changed_code, changed_input
                 self._hook_changed_record( changed_code, changed_input)
             else:
@@ -769,7 +806,7 @@ class TrackedFile(RawNode):
             self._hook_indexed_missing_file()
 
         if not (file_absent or index_absent):
-            v1 = st_time_size( rec['stat_result'])
+            v1 = st_time_size( AttrDict(rec['stat_result']))
             v2 = st_time_size( os_stat_safe(self.realpath()) )
             if  v1!= v2:
                 if self.VERBOSE:
@@ -788,7 +825,7 @@ class TrackedFile(RawNode):
         # stat_result =os.stat(self.realpath())
         stat_result =os_stat_safe(self.realpath())
         # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime,))
-        return dict(stat_result = stat_result)
+        return _loads(_dumps( dict(stat_result = stat_result)))
 
 
     

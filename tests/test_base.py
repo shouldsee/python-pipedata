@@ -22,7 +22,7 @@ import sys
 import pipedata.base as pipedata
 # from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
-from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
+from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError, ChangedOutputError
 # from pipedata.types import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 from pipedata.base import IndexNode
 
@@ -80,6 +80,7 @@ class SharedCases(object):
     IndexedDiffFileError = IndexedDiffFileError
     IndexedMissingFileError = IndexedMissingFileError
     ChangedNodeError = ChangedNodeError
+    ChangedOutputError = ChangedOutputError
     def realpath(self):
         return self._realpath
     @staticmethod
@@ -166,7 +167,7 @@ rm tests-out5.txt
             # except Exception as e:
             #     _dbg()
 
-            self.assertRaises( IndexedMissingFileError, PipeRunner('pipe','pipe.py'))
+            self.assertRaises( ChangedOutputError, PipeRunner('pipe','pipe.py'))
             pass
         return
 
@@ -189,19 +190,28 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
             # pr = getPr()
             self.assertRaises( index_diff_error, getPr() )
 
+    class index_diff_error(Exception):
+        pass
+    def getPr(self):
+        index_diff_error = self.index_diff_error
+        pr =  PipeRunner('pipe','pipe.py')
+        # pr.pipe.MasterNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
+        pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
+            _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
+        # pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
+        #     _raise(index_diff_error()) if (False,True)==(ccode,cinput) else None)        
+        return pr
+
     def test_changedNode(self):
         with path.Path(self.test_init()).makedirs_p() as d:
+            getPr = self.getPr
+            pr = getPr()()
 
-            class index_diff_error(Exception):
-                pass
-#             class 
+    def _test_changedNode(self):
+        with path.Path(self.test_init()).makedirs_p() as d:
+            getPr = self.getPr
+            pr = getPr()()
 
-            def getPr():
-                pr =  PipeRunner('pipe','pipe.py')
-                # pr.pipe.MasterNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
-                pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
-                    _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
-                return pr
 
             with open("pipe.py",'a+') as f:
                 
@@ -229,23 +239,23 @@ def out10(  self, (numberFile, letterFile),):
 #             assert 0
             self.assertRaises( index_diff_error, getPr() )
 
-            with open("pipe.py",'a+') as f:
-                f.write(r'''
-### add dependency on dummy file
-dummyFile = InputTrackedFile(index,'test-dummy.txt')
-@MasterNode.from_func(index,{
-    "OUT":TrackedFile(index,"tests-out10.txt"),
-#     "BAM":TrackedFile( "test.fastq.bam"  )
-})
-def out10(  s, (numberFile, letterFile,  dummyFile) ):
+#             with open("pipe.py",'a+') as f:
+#                 f.write(r'''
+# ### add dependency on dummy file
+# dummyFile = InputTrackedFile(index,'test-dummy.txt')
+# @MasterNode.from_func(index,{
+#     "OUT":TrackedFile(index,"tests-out10.txt"),
+# #     "BAM":TrackedFile( "test.fastq.bam"  )
+# })
+# def out10(  s, (numberFile, letterFile,  dummyFile) ):
 
-    number = open( numberFile().path, 'r').read().strip()
-    letter = open( letterFile().path, 'r').read().strip()
-    with open(self['OUT']().path,'w') as f:
-        f.write( 10 * (number+letter)+'\n')
-    return
-''')
-            self.assertRaises( index_diff_error, getPr() )
+#     number = open( numberFile().path, 'r').read().strip()
+#     letter = open( letterFile().path, 'r').read().strip()
+#     with open(self['OUT']().path,'w') as f:
+#         f.write( 10 * (number+letter)+'\n')
+#     return
+# ''')
+#             self.assertRaises( index_diff_error, getPr() )
         
             #### synonymous_code_change
     def test_code_syno_change(self):
