@@ -69,7 +69,7 @@ class AbstractNode(object):
         # sourcefile)
 
     def get_record(self):
-        return self.index.get_record( self.recordId, None)        
+        return self.index.get_record( self.recordId, {})        
 
     def _index_update(self):
         # print ("[UPDATING_INDEX]%s"%self,)
@@ -127,7 +127,7 @@ class AbstractNode(object):
         # print("[UPSTRAM_CHANGED]",self)
         # if self.__class__.__name__ == 'RemoteNode':
         #     _dbgf()
-            
+
         if self.changed_upstream:
             for x in self.input_kw.values():
                 with x.index.realpath().dirname():

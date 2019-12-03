@@ -47,20 +47,17 @@ class MasterNode(AbstractNode):
     @cached_property
     def _changed_tuple(self):    
         recOld = self.get_record()
-        recNew = self.as_record().copy()
+        # .copy()
+        recNew = self.as_record()
+        # .copy()
         recs = [recOld,recNew]
-        if recOld is None:
+        if not recOld:
             # print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
             # self._hook_noindex()
             changed_self, changed_input, changed_output = 1,1,1
 
         else:
             if recOld != recNew:
-                diff = _dict()
-                for rec in recs:
-                    rec['self']['ast_tree'] =ast_proj('\n'.join( rec['self'].pop('sourcelines')) )
-                # trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
-                # changed_self = trees[0] != trees[1]
                 changed_self = recOld['self'] != recNew['self']
                 changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
                 changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
@@ -74,20 +71,21 @@ class MasterNode(AbstractNode):
                 changed_self, changed_input, changed_output = 0,0,0
         changed_input = 0
         return (changed_self,changed_input,changed_output)
-        
+    def get_source(self):
+        return  self._get_func_code(self.func)
     def as_snapshot(self):
         return _dict([
         ('class', self.__class__.__name__),
-        ('self',_dict( [('sourcelines', self._get_func_code(self.func).splitlines())]) ),
-        # ('self',[('sourcelines', self._get_func_code(self.func).splitlines())]),
+        ('self',_dict([('ast_tree',  ast_proj(self.get_source()) )])),
+        ('meta',_dict( [('sourcelines',  self.get_source().splitlines())]) ),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
         return self.as_record()
     def as_record(self,):
         return _dict([
         ('class', self.__class__.__name__),
-        ('self',_dict( [('sourcelines', self._get_func_code(self.func).splitlines())]) ),
-        # ('sourcelines', self._get_func_code(self.func).splitlines()),
+        ('self',_dict([('ast_tree',  ast_proj(self.get_source()) )])),
+        ('meta',_dict( [('sourcelines',  self.get_source().splitlines())]) ),
         ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
