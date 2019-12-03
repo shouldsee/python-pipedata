@@ -2,6 +2,41 @@ from tests.test_base import SharedCases as SharedObject
 import unittest
 import os
 
+from pipedata.master_node import MasterNode
+# class RemoteNode(MasterNode):
+#     @staticmethod
+#     def _func(self, (remote_node,),):
+#         _ = '''
+#         ### should modify remote leaves records to include self
+#         '''
+#         self._output_kw = self.remote_node()._output_kw
+#         if remote_node.runned:
+#             return remote_node.returned             
+#         else:
+#             return None     
+#     def __init__(self,index,remote_path,remote_name,name=None):
+#         self.remote_path = path.Path(remote_path).realpath()
+#         self.remote_name = remote_name
+#         if name is None:
+#             name = remote_name
+#         assert remote_path.endswith(".py")
+#         input_kw = {}
+#         output_kw = {}
+#         super(RemoteNode,self).__init__(index, self._func, input_kw, output_kw, name,force=0 )
+
+#     def changed(self):
+#         return
+#     def changed_upstream(self):
+#         pass
+
+#     def as_record(self):
+#         return _dict([
+#             ("remote_path" , self.remote_path),
+#             ("remote_name" , self.remote_name),
+#             ("remote_record",self.remote_node.as_snapshot()),
+#             # ("remote_record",self.remote_node.as_record())
+#             ])
+
 import random
 RINT = int(100 * random.random())
 def _writeStage2(fn,RINT=RINT):
@@ -13,8 +48,9 @@ from pipedata.types import RemoteNode
 
 index = IndexNode()
 
-import imp
-index.node_dict['out5'] = imp.load_source('aaaapipe','../stage1/pipe.py').index.node_dict['out5']
+RemoteNode(index, remote_path='../stage1/pipe.py',remote_name='out5')
+##import imp
+##index.node_dict['out5'] = imp.load_source('aaaapipe', '../stage1/pipe.py').index.node_dict['out5']
 
 @MasterNode.from_func(index,)
 def main(s,(out5,),
