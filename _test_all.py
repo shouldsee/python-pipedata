@@ -23,13 +23,15 @@ import pipedata.base as pipedata
 # from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
 from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
-# from pipedata.types import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 from pipedata.base import IndexNode
 
 from pipedata.types import TrackedFile, InputTrackedFile
+
 import pipedata.types
-
-
+# import os as pip/e
+def _shell(cmd,shell=True):
+    sys.stderr.write("[CMD]%s\n"%cmd)
+    return subprocess.check_output(cmd,shell=shell)
 
 def _raise(e):
     raise e
@@ -42,17 +44,16 @@ class PipeRunner(object):
             fname
         self.key = key
         key = self.key
-        # import pipedata.base as pipedata
-        # imp.reload(pipedata)
-        fname = os.path.realpath(fname)
-
+        import pipedata.base as pipedata
+        imp.reload(pipedata)
+        pipedata.IndexedDiffFileError = IndexedDiffFileError
+        pipedata.IndexedMissingFileError = IndexedMissingFileError
+        pipedata.ChangedNodeError = ChangedNodeError
 #         reload(pipedata) ### class attributes would otherwise be kept  e.g. InputTrackedFile.counter
         linecache.checkcache(fname) #### otherwise one cannot reliably
 #         assert 0,linecache.checkcache(fname)
-        self.pipe = pipe =  imp.load_source( key, fname)
-        # pipe.IndexedDiffFileError = IndexedDiffFileError
-        # pipe.IndexedMissingFileError = IndexedMissingFileError
-        # pipe.ChangedNodeError = ChangedNodeError        
+        self.pipe = imp.load_source( key, fname)
+        
     def __call__(self,*a,**kw):
         pipe_run(self.pipe.index)
         return self.pipe.index
@@ -61,39 +62,21 @@ class PipeRunner(object):
 def _dbg():
     import inspect
     pr = PipeRunner('pipe','pipe.py')
-    # f = pr.pipe.out10.f
-    # _code = f.__code__
+    f = pr.pipe.out10.f
+    _code = f.__code__
     print (_code.co_code.__repr__())
     print (_code.co_consts.__repr__())
     print (inspect.getsource(f))
-def _dbgf():        
-    import pdb,traceback
-    print(traceback.format_exc())
-    import traceback
-    traceback.print_stack()
-    traceback.print_exc()
-    pdb.set_trace()        
 
-class SharedCases(object):
-    _realpath = path.Path(__file__).dirname().dirname().realpath()
-    PipeRunner = PipeRunner
-    IndexedDiffFileError = IndexedDiffFileError
-    IndexedMissingFileError = IndexedMissingFileError
-    ChangedNodeError = ChangedNodeError
-    def realpath(self):
-        return self._realpath
-    @staticmethod
-    def _shell(cmd,shell=True):
-        sys.stderr.write("[CMD]%s\n"%cmd)
-        return subprocess.check_output(cmd,shell=shell)
-
-    def test_import(self,fn=None):
-        fn = fn or 'tests/example_string_short.py'
+class Case(unittest.TestCase):
+    def test_import(self):
+        pass
 #         print "[CURR]",os.getcwd()
-        pipe = PipeRunner('pipe', fn).pipe
+        pipe = PipeRunner('pipe','tests/example_string_short.py').pipe
         
+#         import tests.example_string_short as pipe
+#         pipe.__file__ = os.path.realpath(pipe.__file__)
         return pipe
-
     def test_repr_tracked_dict(self):
         # PipeRunner('pipe','pipe.py')
         # __file__ = '__test__'
@@ -106,19 +89,34 @@ class SharedCases(object):
         assert vnew.data == v.data,(s,v,vnew)
         
     def test_dillable(self):
-        pipe = self.test_import('tests/example_string_short.py')
-        # reload(pipe)
+        pipe = self.test_import()
         import dill
         dill.dumps(pipe,)
         print("[Dillable]")
         
+    def make_copy(self, name =None):
+        pipe = self.test_import()
+        if name is None:
+            name = 'test_build'
+            
+        subprocess.check_output("mkdir -p {name}/ && rm -fr {name}/*".format(**locals())
+                                ,shell=1)
+#         modpath = name+'/pipe.py'
+        d = path.Path(name)
 
+        fn = pipe.__file__.replace('.pyc','.py')
+        shutil.copy2(fn,d/"pipe.py" )
+#         shutil.copy2('tests/example_string_short.py'.replace('.pyc','.py'), modpath )
+        import pipedata
+        fn = pipedata.__file__.replace('.pyc','.py')
+        shutil.copy2( fn, d/"pipedata.py")
         
-    def test_init(self):
-        dirname = self.test_import('tests/example_string_short.py').index.make_copy("test_build/stage1",name='pipe.py')
-        # dirname = se
+        return name
+        
+    def test_1(self):
+        dirname = self.make_copy()
         with path.Path(dirname) as d:
-            print ( self._shell('''
+            print (_shell('''
     echo "1"> tests-number.txt; 
     echo a>tests-letter.txt; 
             '''.format(**locals()))    )
@@ -128,50 +126,34 @@ class SharedCases(object):
             pipe = PipeRunner('pipe','pipe.py')()
             print (open(pipe._symbolicRootNode.input_kw['make_combined']['OUT'].path,'r').read()    )
         return dirname
-    # def test_init2(self):
-
-    def make_index_diff(self):
-    # def test_indexedDiffFile(self):
-        with path.Path(self.test_init()).makedirs_p() as d:
-            self._shell('''
+    
+    def test_indexedDiffFile(self):
+        with path.Path(self.test_1()).makedirs_p() as d:
+            _shell('''
 touch tests-out5.txt
 ''')
             self.assertRaises( IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
             pass
-        with path.Path(self.test_init()).makedirs_p() as d:
-            self._shell('''
+        with path.Path(self.test_1()).makedirs_p() as d:
+            _shell('''
 echo 123> tests-out10.txt
 ''')
             # PipeRunner('pipe','pipe.py')()
             self.assertRaises( IndexedDiffFileError, PipeRunner('pipe','pipe.py'))
             pass
         return
-
     def test_indexedMissingFile(self):
-        with (self.test_init()).makedirs_p().realpath() as d:
-            # PipeRunner('pipe','pipe.py')()
-            # PipeRunner('pipe','pipe.py')()
-            self._shell('''
+        with path.Path(self.test_1()).makedirs_p() as d:
+
+            _shell('''
 rm tests-out5.txt             
 ''')
-            # PipeRunner('pipe','pipe.py')()
-            # try:
-            #     PipeRunner('pipe','pipe.py')()
-            # except Exception as e:
-            #     assert 0
-            # finally:
-            #     assert 0
-
-               # print("DONE")
-            # except Exception as e:
-            #     _dbg()
-
             self.assertRaises( IndexedMissingFileError, PipeRunner('pipe','pipe.py'))
             pass
         return
 
     def test_tracked_dict_indexed_diff(self):
-        with path.Path(self.test_init()).makedirs_p() as d:
+        with path.Path(self.test_1()).makedirs_p() as d:
             class index_diff_error(Exception):
                 pass
             def getPr():
@@ -190,7 +172,7 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
             self.assertRaises( index_diff_error, getPr() )
 
     def test_changedNode(self):
-        with path.Path(self.test_init()).makedirs_p() as d:
+        with path.Path(self.test_1()).makedirs_p() as d:
 
             class index_diff_error(Exception):
                 pass
@@ -198,9 +180,7 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
             def getPr():
                 pr =  PipeRunner('pipe','pipe.py')
-                # pr.pipe.MasterNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
-                pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
-                    _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
+                pr.pipe.RawNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
                 return pr
 
             with open("pipe.py",'a+') as f:
@@ -209,7 +189,7 @@ _p = TrackedDict(index, data={"a":1,"foo":"why am i here?"} , name='paramDict')
 
 
 ### changed 10 to 25
-@MasterNode.from_func(index,{
+@RawNode.from_func(index,{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -233,7 +213,7 @@ def out10(  self, (numberFile, letterFile),):
                 f.write(r'''
 ### add dependency on dummy file
 dummyFile = InputTrackedFile(index,'test-dummy.txt')
-@MasterNode.from_func(index,{
+@RawNode.from_func(index,{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 #     "BAM":TrackedFile( "test.fastq.bam"  )
 })
@@ -254,13 +234,13 @@ def out10(  s, (numberFile, letterFile,  dummyFile) ):
             pass
         def getPr():
             pr =  PipeRunner('pipe','pipe.py')
-            pr.pipe.MasterNode._hook_indexed_diff_file = lambda self:_raise(myError("%s"%self))
+            pr.pipe.RawNode._hook_indexed_diff_file = lambda self:_raise(myError("%s"%self))
             return pr        
         
-        with path.Path(self.test_init()).makedirs_p() as d:
+        with path.Path(self.test_1()).makedirs_p() as d:
             with open("pipe.py",'a+') as f:
                 f.write(r'''
-@MasterNode.from_func(index,{{
+@RawNode.from_func(index,{{
     "OUT":TrackedFile(index,"tests-out10.txt"),
 }})
 def out10(  self, (numberFile, letterFile),):
@@ -287,10 +267,9 @@ def out10(  self, (numberFile, letterFile),):
 
 
     def test_changedVal(self):
-        # dirname = self.make_copy()
-        dirname = self.test_init()
+        dirname = self.make_copy()
         with path.Path(dirname) as d:
-            print (self._shell('''
+            print (_shell('''
     echo "1"> tests-number.txt; 
     echo a>tests-letter.txt; 
             '''.format(**locals()))  )
@@ -309,26 +288,25 @@ def out10(  self, (numberFile, letterFile),):
 #             return
             pr = PipeRunner('pipe','pipe.py')
             pipe = pr.pipe
-            # pipe.MasterNode.OLD = 0
-
-#             pipe.TrackedFile.VERBOSE = 0
-#             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
-            
-#             self._shell('''
-# rm tests-out5.txt             
-# ''')        
-#             nodes = pipe.index._symbolicRootNode.input_kw.values()
-#             [node.changed for node in nodes]
-#             [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
-            
-            pr = PipeRunner('pipe','pipe.py')
-            pipe = pr.pipe
-            # pipe.MasterNode.OLD = 0
+            # pipe.RawNode.OLD = 0
             pipe.TrackedFile.VERBOSE = 0
             pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
             
-            self._shell('''
-touch tests-letter.txt             
+            _shell('''
+rm tests-out5.txt             
+''')        
+            nodes = pipe.index._symbolicRootNode.input_kw.values()
+            [node.changed for node in nodes]
+            [[sys.stdout.write("%s\n"%[node,node.changed,node.changed_upstream]),node.changed][1] for node in nodes]
+            
+            pr = PipeRunner('pipe','pipe.py')
+            pipe = pr.pipe
+            # pipe.RawNode.OLD = 0
+            pipe.TrackedFile.VERBOSE = 0
+            pipe.TrackedFile.HOOKS_ENABLED_LIST=[]
+            
+            _shell('''
+rm tests-letter.txt             
 ''')        
             nodes = pipe.index._symbolicRootNode.input_kw.values()
             [node.changed for node in nodes]
@@ -369,8 +347,6 @@ touch tests-letter.txt
         assert out5.level_stream == File1.level_stream ==File2.level_stream == {out5,File1,File2}
 
 #         return self.test_dillable()
-class BaseCase( unittest.TestCase,SharedCases,):
-    pass
 
 import pdb
 import traceback

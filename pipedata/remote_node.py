@@ -1,21 +1,24 @@
 from pipedata.base import cached_property,frame__default,_dict
 from pipedata.base import IndexedDiffFileError
-from pipedata.base import RawNode
+from pipedata.base import RawNode,AbstractNode
 import path
 import imp
-class RemoteNode(RawNode):
+class RemoteNode(AbstractNode):
+    VERBOSE = 0
     def __repr__(self,):
         return '%s(index=%r, name=%r,force=%r,)'%(self.__class__.__name__,
             self.index,self.name, self.force, )
     def __call__(self):
         return self.called_value
+    def __getitem__(self,k):
+        return self.output_kw[k]
     def __init__(self, index, remote_path, remote_name, name = None, frame=None,force=0 ):
         if name is None:
             name = remote_name
         assert remote_path.endswith(".py")
         self.remote_name = remote_name
         self.remote_path = path.Path(remote_path).realpath()
-    # def __init__(self, name, data, frame=None, force = 0):
+        self.force =force
         frame = frame__default(frame)
 
         # input_kw = 
@@ -27,14 +30,15 @@ class RemoteNode(RawNode):
                 _ = '''
                 ### should modify remote leaves records to include self
                 '''
-                self.output_kw = self.remote_node().output_kw
+                self._output_kw = self.remote_node()._output_kw
                 # remote_node()
                 if remote_node.runned:
                     return remote_node.returned             
                 else:
                     return None   
             # output_kw = _dict(output_kw)
-            super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
+            super( self.__class__, self).__init__( index, func, input_kw, output_kw, name)
+            # force, frame, skip, name, tag)
         _f()
 
     def _init_func(self, d=None, skip =1):
@@ -118,4 +122,6 @@ class RemoteNode(RawNode):
         return _dict([
             ("remote_path" , self.remote_path),
             ("remote_name" , self.remote_name),
-            ("remote_record",self.remote_node.as_record())])
+            ("remote_record",self.remote_node.as_snapshot()),
+            # ("remote_record",self.remote_node.as_record())
+            ])

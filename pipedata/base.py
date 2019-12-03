@@ -229,6 +229,7 @@ class AbstractNode(object):
         self.init_output_kw = output_kw
         self.index = self.indexFile = index
         self._attach_to_root()
+        self.runned = 0 
 
     def __call__(self,*a,**kw):
         return self.called_value
@@ -257,9 +258,11 @@ class AbstractNode(object):
         return self.func_orig
 
     def _get_func_code(self, func):
-        linecache.checkcache( self.index.path.replace('.py.index','.py'))
+        sourcefile = self.index.path.replace('.py.index','.py')
+        linecache.checkcache( sourcefile )
         # func.__module__.__file__)
-        return  inspect.getsource(func)
+        return  inspect.getsource(func, )
+        # sourcefile)
 
     def get_record(self):
         return self.index.get_record( self.recordId, None)        
@@ -364,13 +367,15 @@ class AbstractNode(object):
             output_kw = output_kw
         else:
             output_kw = self.init_output_kw
+        self._output_kw = output_kw
         self._level_stream.update( output_kw.values() )
         return input_kw,output_kw
 
     @property
     def output_kw(self):
-        input_kw,output_kw = self.initialised_tuples
-        return output_kw
+        # input_kw,output_kw = self.initialised_tuples
+        self.initialised_tuples
+        return self._output_kw
     @property
     def input_kw(self):
         input_kw,output_kw = self.initialised_tuples
@@ -447,7 +452,6 @@ class MasterNode(AbstractNode):
         ('sourcelines', self._get_func_code(self.func).splitlines()),
         ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
-
         ])
 class SlaveNode(AbstractNode):
     pass

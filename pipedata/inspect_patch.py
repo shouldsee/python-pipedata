@@ -16,12 +16,10 @@ def findsource(object, file = None):
     or code object.  The source code is returned as a list of all the lines
     in the file and the line number indexes a line in that list.  An IOError
     is raised if the source code cannot be retrieved."""
-    # assert file is not None
     if file is None:
         file = _getoriginfile(object)
 
     module = getmodule(object, file)
-    linecache.checkcache(file)
     if module:
         lines = linecache.getlines(file, module.__dict__)
     else:
@@ -73,28 +71,3 @@ def findsource(object, file = None):
             lnum = lnum - 1
         return lines, lnum
     raise IOError('could not find code object')
-inspect.findsource = findsource
-
-def getsourcelines(object,file=None):
-    """Return a list of source lines and starting line number for an object.
-
-    The argument may be a module, class, method, function, traceback, frame,
-    or code object.  The source code is returned as a list of the lines
-    corresponding to the object and the line number indicates where in the
-    original source file the first line of code was found.  An IOError is
-    raised if the source code cannot be retrieved."""
-    lines, lnum = findsource(object,file)
-
-    if ismodule(object): return lines, 0
-    else: return getblock(lines[lnum:]), lnum + 1
-inspect.getsourcelines = getsourcelines
-
-def getsource(object,file=None):
-    """Return the text of the source code for an object.
-
-    The argument may be a module, class, method, function, traceback, frame,
-    or code object.  The source code is returned as a single string.  An
-    IOError is raised if the source code cannot be retrieved."""
-    lines, lnum = getsourcelines(object,file)
-    return string.join(lines, '')
-inspect.getsource = getsource

@@ -4,8 +4,8 @@ import os,sys
 
 # import tests
 # print tests.__file__
-from test_base import BaseCase, debugTestRunner
-from test_base import SharedCases as _SharedObject
+from tests.test_base import BaseCase, debugTestRunner
+from tests.test_base import SharedCases as _SharedObject
 
 
 

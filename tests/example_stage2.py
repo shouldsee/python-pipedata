@@ -1,7 +1,7 @@
 import os,sys
 sys.path.insert(0, os.getcwd())
 from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
-from pipedata.types import TrackedDict,RemoteNode
+from pipedata.types import TrackedDict,RemoteNode,MasterNode
 import os
 index = IndexNode()
 # assert 0
@@ -30,7 +30,7 @@ There are two choices here:
 '''
 RemoteNode(index,remote_path='../stage1/pipe.py',remote_name='out5')
 
-@RawNode.from_func(index,)
+@MasterNode.from_func(index,)
 def main(s,(out5,),(meta,)):
     # out5.initialised
     # print (out5.remote_entity,)
