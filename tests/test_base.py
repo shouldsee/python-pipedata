@@ -27,6 +27,7 @@ from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNo
 from pipedata.base import IndexNode
 
 from pipedata.types import TrackedFile, InputTrackedFile
+from pipedata.types import SlaveNode
 import pipedata.types
 
 
@@ -271,7 +272,7 @@ def out10(  self, (numberFile, letterFile),):
             with open("pipe.py",'a+') as f:
                 f.write(r'''
 @MasterNode.from_func(index,{{
-    "OUT":TrackedFile(index,"tests-out10.txt"),
+    "OUT":SlaveFile(index,"tests-out10.txt"),
 }})
 def out10(  self, (numberFile, letterFile),):
     ###
@@ -288,12 +289,28 @@ def out10(  self, (numberFile, letterFile),):
 #                     doc="'''docstirng'''"
                 ),)
 
-#             pr =  PipeRunner('pipe','pipe.py')
-
             pr = getPr()
             pr()
 
         pass
+
+    def test_dangling_slave(self):
+        with path.Path(self.test_init()).makedirs_p() as d:
+            with open("pipe.py",'a+') as f:
+                f.write(r'''
+SlaveFile(index,"dangling_slave.txt")                    
+
+                '''.format(
+                    doc = '',
+#                     doc="'''docstirng'''"
+                ),)
+
+#             pr =  PipeRunner('pipe','pipe.py')
+            # pr = getPr()
+            # pr()
+            self.assertRaises(SlaveNode.DanglingSlaveError, self.getPr())
+
+        pass        
 
 
     def test_changedVal(self):

@@ -56,10 +56,16 @@ class MyEncoder(json.JSONEncoder):
             return {"st_mtime": o.st_mtime, "st_size":o.st_size}
         else:
             assert 0,(o,type(o))
-def _dumps(s):
-    return json.dumps(s, cls=MyEncoder,indent=4)
-def _loads(s):
-    return json.loads(s)
+class Dumper(object):
+    @staticmethod
+    def _dumps(s):
+        return json.dumps(s, cls=MyEncoder,indent=4)
+    @staticmethod
+    def _loads(s):
+        return json.loads(s)
+    pass
+dumper = Dumper
+
     # dumps(s, cls=MyEncoder )
         # return o.__dict__   
 # def file_not_empty(fpath):
@@ -178,7 +184,7 @@ class IndexNode(object):
             print("[FLUSHING_INDEX]",self.path)
             with open(fname,"wb") as f:
                 # dill.dump( d, f, )
-                f.write(_dumps(d))
+                f.write(dumper._dumps(d))
                 # f.write(dill.dumps( d))
                 # , f, )
                 # dill.dump( d, f, protocol=dill.HIGHEST_PROTOCOL)
@@ -190,7 +196,7 @@ class IndexNode(object):
         if file_not_empty( self.path):
             with open( self.path, "rb") as f:
                 # it = ()
-                d = _loads(f.read(), )
+                d = dumper._loads(f.read(), )
                 # object_pairs_hook=_dict)
         else:
             d = _dict()
@@ -243,6 +249,7 @@ class ChangedOutputError(Exception):
     pass
 
 class AbstractNode(object):
+    ChangedOutputError = ChangedOutputError
     force_index_update = 0 
     tag = None
     def __init__(self, index, func, input_kw, output_kw, name):
@@ -255,6 +262,7 @@ class AbstractNode(object):
         self.index = self.indexFile = index
         self._attach_to_root()
         self.runned = 0 
+        self.running = 0
 
     def __call__(self,*a,**kw):
         return self.called_value
@@ -337,10 +345,13 @@ class AbstractNode(object):
                     x.called_value
             # [ x.called_value for x in self.input_kw.values() ]
         if any([self.changed_upstream,self.changed]): 
+            self.running = 1
             print("RUNNING:%s"%self)
             input_kw, output_kw = self.initialised_tuples
             args = inspect.getargspec(self.func)[0]
             self.returned = self.func(*([x[1] for x in zip(args, (self, input_kw.values(), output_kw.values() ))]) )
+
+            self.running = 0
             self.runned = 1
         else:
             self.runned = 0
@@ -418,81 +429,10 @@ class AbstractNode(object):
                 ':tag:%s'% self.tag if self.tag else '')
 
 
-class MasterNode(AbstractNode):
-    @property
-    def recordId(self):
-        return self.name
-    def __getitem__(self,key):
-        return self.output_kw[key]
-
-    def __init__(self, index, func, input_kw, output_kw, force, name, ):
-        super(self.__class__, self).__init__( index, func, input_kw, output_kw, name)
-
-    @classmethod
-    def from_func(cls, index, output_kw = {}, force=0,name = None ):
-        def _dec(func):
-            input_kw = {}
-            self = cls(index, func, input_kw, output_kw, force, name)
-            return self        
-        return _dec        
 
 
-    @property
-    def _changed(self):
-        return self._changed_tuple[0]
-    @property
-    def changed_upstream(self):
-        return self._changed_tuple[1]
-    def _hook_changed_record(self, changed_code,changed_input):
-        return 
-    @cached_property
-    def _changed_tuple(self):    
-        recOld = self.get_record()
-        recNew = self.as_record()
-        recs = [recOld,recNew]
-        if recOld is None:
-            print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
-            # self._hook_noindex()
-            changed_code, changed_input = 1,1
-        else:
-            if recOld != recNew:
-                diff = _dict()
-                trees = [ ast_proj('\n'.join( rec['sourcelines'])) for rec in recs ]
-                changed_code = trees[0] != trees[1]
-                changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
-                changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
-                if changed_output:
-                    for k in recOld['output_snapshot']:
-                        v1 = recOld['output_snapshot'][k]
-                        v2 = recNew['output_snapshot'][k]
-                        if v1!=v2:
-                            print(self,k,v1,v2)
-                    raise ChangedOutputError("output for %s has changed since snapshot"%self)
-                print("[CHANGED_DIFF](%s,%s),%s%s"%(changed_code,changed_input,self,self.index,))
-                changed_code, changed_input
-                self._hook_changed_record( changed_code, changed_input)
-            else:
-                print("[CHANGED_SAME]%s%s"%(self.index,self))
-                changed_code, changed_input = 0,0
-
-        return changed_code,changed_input
-    def as_snapshot(self):
-        return _dict([
-        ('class', self.__class__.__name__),
-        ('sourcelines', self._get_func_code(self.func).splitlines()),
-        ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
-        ])
-        return self.as_record()
-    def as_record(self,):
-        return _dict([
-        ('class', self.__class__.__name__),
-        ('sourcelines', self._get_func_code(self.func).splitlines()),
-        ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
-        ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
-        ])
 class SlaveNode(AbstractNode):
     pass
-    # def _changed(self):
 
 
 
@@ -711,8 +651,6 @@ class RawNode(AbstractNode):
 
 
 
-
-
     def as_record(self, ):
         src = self._get_func_code(self.func_orig)
 
@@ -725,7 +663,6 @@ class RawNode(AbstractNode):
                     ("name",self.name ),
                     ("tag",self.tag)
                     ]))
-
 
 
 # class TrackedFile(object):    
@@ -825,7 +762,7 @@ class TrackedFile(RawNode):
         # stat_result =os.stat(self.realpath())
         stat_result =os_stat_safe(self.realpath())
         # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime,))
-        return _loads(_dumps( dict(stat_result = stat_result)))
+        return dumper._loads( dumper._dumps( dict(stat_result = stat_result)))
 
 
     

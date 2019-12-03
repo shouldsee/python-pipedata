@@ -1,6 +1,6 @@
 from pipedata.base import RawNode,TrackedFile, InputTrackedFile,  IndexNode
 from pipedata.types import TrackedDict
-from pipedata.types import MasterNode
+from pipedata.types import MasterNode,SlaveFile
 import os
 
 index = IndexNode()
@@ -17,9 +17,11 @@ print (index._symbolicRootNode.input_kw)
 
 _p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='paramDict')
 
+# _f = SlaveFile(index, master="out5", path = "tests-out5.txt")
 @MasterNode.from_func(index,
     {
-    "OUT":TrackedFile(index, "tests-out5.txt",),
+    "OUT":  SlaveFile(index,  path = "tests-out5.txt"),
+
 })
 def out5(  self, (numberFile, letterFile, paramDict), 
     ):
@@ -39,7 +41,7 @@ def out5(  self, (numberFile, letterFile, paramDict),
 
 @MasterNode.from_func(index,
     {
-    "OUT":TrackedFile(index,"tests-out10.txt"),
+    "OUT": SlaveFile(index,"tests-out10.txt"),
 })
 def out10(  self, (numberFile, letterFile), ):
     '''
