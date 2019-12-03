@@ -3,27 +3,18 @@ import unittest
 unittest.TestCase.assertRaises
 
 import os,sys
-#sys.path.insert(0,os.path.dirname(os.path.dirname(__file__)))
-#os.chdir('..')
-# from pymisca.tree import getPathStack
 import path
 import imp
-# def getPathStack(x):
-#     return path.Path(x[0])
 
 import subprocess
 import shutil
 import sys
 
 from pipedata.pipe_run import pipe_run
-# , _load_source
 import imp
 import sys
 import pipedata.base as pipedata
-# from pipedata.types import TrackedDic
 from pipedata.types import TrackedDict
-# from pipedata.base import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError, ChangedOutputError
-# from pipedata.types import IndexedDiffFileError,IndexedMissingFileError,ChangedNodeError
 from pipedata.base import IndexNode
 
 from pipedata.types import TrackedFile, InputTrackedFile

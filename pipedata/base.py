@@ -110,6 +110,9 @@ class SymbolicRootNode(object):
 
 class IndexNode(object):
 # class Pipeline(object):
+    @property 
+    def node_dict(self):
+        return self._root.input_kw
     def __repr__(self):
         return "%s(path=%r)"%(self.__class__.__name__, str(self.path))
     def __init__(self,path = None, frame=None):

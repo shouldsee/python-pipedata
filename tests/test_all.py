@@ -6,9 +6,15 @@ import os,sys
 
 import path
 import imp
+
+# from tests.test_base import BaseCase,debugTestRunner
+# from tests.test_remote import ThisCase
+# from tests.test_graph import GraphCase
+ # as CaseBase
+sys.path.insert(0,os.path.dirname(os.path.dirname(__file__)))
 from tests.test_base import BaseCase,debugTestRunner
 from tests.test_remote import ThisCase
- # as CaseBase
+from tests.test_graph import GraphCase
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()

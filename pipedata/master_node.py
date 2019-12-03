@@ -29,10 +29,7 @@ class MasterNode(AbstractNode):
 
     @property
     def changed(self):
-        return self._changed_tuple[0]
-    @property
-    def changed_upstream(self):
-        return self._changed_tuple[1]
+        return any(self._changed_tuple)
 
     @staticmethod
     def _hook_changed_output(self,recOld,recNew):
@@ -46,6 +43,7 @@ class MasterNode(AbstractNode):
 
     def _hook_changed_record(self, changed_code,changed_input):
         return 
+
     @cached_property
     def _changed_tuple(self):    
         recOld = self.get_record()
@@ -54,7 +52,8 @@ class MasterNode(AbstractNode):
         if recOld is None:
             print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
             # self._hook_noindex()
-            changed_code, changed_input = 1,1
+            changed_code, changed_input, changed_output = 1,1,1
+
         else:
             if recOld != recNew:
                 diff = _dict()
@@ -64,14 +63,14 @@ class MasterNode(AbstractNode):
                 changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
                 if changed_output:
                     self._hook_changed_output(self, recOld,recNew)
-                print("[CHANGED_DIFF](%s,%s),%s%s"%(changed_code,changed_input,self,self.index,))
-                changed_code, changed_input
+                print("[CHANGED_DIFF](%s,%s,%s),%s%s"%(changed_code,changed_input,changed_output,self,self.index,))
+                changed_code, changed_input,changed_output
                 self._hook_changed_record(changed_code, changed_input)
             else:
                 print("[CHANGED_SAME]%s%s"%(self.index,self))
-                changed_code, changed_input = 0,0
+                changed_code, changed_input, changed_output = 0,0,0
 
-        return changed_code,changed_input
+        return (changed_code,changed_input,changed_output)
     def as_snapshot(self):
         return _dict([
         ('class', self.__class__.__name__),

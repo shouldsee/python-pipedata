@@ -114,6 +114,7 @@ class AbstractNode(object):
         #### evalutaion of value/sideeffects
         Core functionality to make  
         '''
+        print("[UPSTRAM_CHANGED]",self)
         if self.changed_upstream:
             for x in self.input_kw.values():
                 with x.index.realpath().dirname():

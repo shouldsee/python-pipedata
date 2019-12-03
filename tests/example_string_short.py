@@ -4,23 +4,12 @@ from pipedata.types import MasterNode, SlaveFile, SelfSlaveFile
 import os
 
 index = IndexNode()
-# symin, symout, index= frame_init()
-# print ("[indexFile]",_indexFile)
 print ("[indexFile]",index)
 
-# _f1 = InputTrackedFile('tests-number.txt',name='numberFile')
-# _f2 = InputTrackedFile('tests-letter.txt',name='letterFile')
-
-# _f1 = InputTrackedFile( index, 'tests-number.txt',name='numberFile')
-# _f2 = InputTrackedFile( index, 'tests-letter.txt',name='letterFile')
 _f1 = SelfSlaveFile( index, 'tests-number.txt',name='numberFile')
 _f2 = SelfSlaveFile( index, 'tests-letter.txt',name='letterFile')
-# _f3 = InputTrackedFile('tests-dummy.txt',name='dummyFile')
-print (index._symbolicRootNode.input_kw)
+print (index._root.input_kw)
 
-# _p = TrackedDict(index, data={"a":1,"I am in the original script":2} , name='paramDict')
-
-# _f = SlaveFile(index, master="out5", path = "tests-out5.txt")
 @MasterNode.from_func(index,
     {
     "OUT":  SlaveFile(index,  path = "tests-out5.txt"),
@@ -99,30 +88,8 @@ def make_combined( self, (out5, out10, out15,), ):
 
 if __name__ == '__main__':
     print('START' + 20*"-")
-    # nodes = [self._symbolicOutputNode.input_kw]
-    # self._symbolicOutputNode()
-    # vars(self)
     self = index
     with self.path.dirname():
         [ x() for x in self._symbolicRootNode.input_kw.values()]
     self.index_file_flush()
     print('END' + 20*"-")
-
-    # from pipedata import index_file_flush
-
-    # TrackedFile.VERBOSE=0
-    # print('START' + 20*"-")
-    # symout()
-    # print(symout().input_kw['make_combined']['OUT'].open('r').read())
-    # index_file_flush()
-    # print('END' + 20*"-")
-    
-    # import dill
-    # dill.dumps(symout)
-
-#     dill.dumps(make_combined)
-#     print symout
-    
-#     make_bam()
-#     make_csv()
-#     print("[middle]",middle())
