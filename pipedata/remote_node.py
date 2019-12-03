@@ -27,9 +27,12 @@ class RemoteNode(RawNode):
                 _ = '''
                 ### should modify remote leaves records to include self
                 '''
-                self.output_kw = self.remote_node().output_kw
+                # self.output_kw = self.remote_node().output_kw
                 # remote_node()
-                return remote_node.returned                
+                if remote_node.runned:
+                    return remote_node.returned             
+                else:
+                    return None   
             # output_kw = _dict(output_kw)
             super( self.__class__, self).__init__(index, func, input_kw, output_kw, force, frame, skip, name, tag)
         _f()
