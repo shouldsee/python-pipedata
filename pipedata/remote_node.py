@@ -27,7 +27,7 @@ class RemoteNode(RawNode):
                 _ = '''
                 ### should modify remote leaves records to include self
                 '''
-                # self.output_kw = self.remote_node().output_kw
+                self._output_kw = self.remote_node()._output_kw
                 # remote_node()
                 if remote_node.runned:
                     return remote_node.returned             

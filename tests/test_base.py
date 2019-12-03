@@ -44,7 +44,7 @@ class PipeRunner(object):
         key = self.key
         # import pipedata.base as pipedata
         # imp.reload(pipedata)
-
+        fname = os.path.realpath(fname)
 
 #         reload(pipedata) ### class attributes would otherwise be kept  e.g. InputTrackedFile.counter
         linecache.checkcache(fname) #### otherwise one cannot reliably
