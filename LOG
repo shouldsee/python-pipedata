@@ -12,6 +12,7 @@
   from pipedata.types import RemoteNode
 
 START--------------------
+<<<<<<< HEAD
 [CHANGED_TUPLE](0,0,0,1),/tmp/tests-number.txt,8780062165733
 [RUNNING]/tmp/tests-number.txt,set([]),True
 [CHANGED_TUPLE](0,0,0,1),/tmp/tests-letter.txt,8780062165733
@@ -28,26 +29,61 @@ START--------------------
 [RUNNING]make_combined_short,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=/tmp/tests-number.txt,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=/tmp/tests-letter.txt,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
 [CHANGED_TUPLE](0,0,0,1),make_combined,8780062165733
 [RUNNING]make_combined,set([(AutoMasterNode(recordId=/tmp/tests-letter.txt,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out10,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=/tmp/tests-number.txt,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+=======
+[CHANGED_TUPLE](0,0,0,1),numberFile,8788697833429
+[RUNNING]numberFile,set([]),True
+[CHANGED_TUPLE](0,0,0,1),letterFile,8788697833429
+[RUNNING]letterFile,set([]),True
+[CHANGED_TUPLE](0,0,0,1),out5,8788697833429
+[RUNNING]out5,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+(<class 'pipedata.master_node.SelfSlaveFile'>, <class 'pipedata.master_node.AutoMasterNode'>)
+()
+[CHANGED_TUPLE](0,0,0,1),out10,8788697833429
+[RUNNING]out10,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[CHANGED_TUPLE](0,0,0,1),out15,8788697833429
+[CHANGED_TUPLE](0,0,0,1),make_combined_short,8788697833429
+[RUNNING]out15,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[RUNNING]make_combined_short,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[CHANGED_TUPLE](0,0,0,1),make_combined,8788697833429
+[RUNNING]make_combined,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out10,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+>>>>>>> ee4052cff4179ee6891ba3e28bca65c30650ba1a
 END--------------------
 1a1a1a1a1a
 1a1a1a1a1a1a1a1a1a1a
 1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
 
+<<<<<<< HEAD
 [CHANGED_TUPLE](0,0,0,0),/tmp/tests-number.txt,8780062124385
 [CHANGED_TUPLE](0,0,0,0),/tmp/tests-letter.txt,8780062124385
 [CHANGED_TUPLE](1,0,0,0),out5,8780062124385
 [CHANGED_TUPLE](0,0,0,1),out5,8780062139693
 [CHANGED_TUPLE](0,0,0,1),main,8780062139693
+=======
+[CHANGED_TUPLE](0,0,0,0),numberFile,8788697793617
+[CHANGED_TUPLE](0,0,0,0),letterFile,8788697793617
+[CHANGED_TUPLE](1,0,0,0),out5,8788697793617
+[CHANGED_TUPLE](0,0,0,1),out5,8788697808493
+[CHANGED_TUPLE](0,0,0,1),main,8788697808493
+>>>>>>> ee4052cff4179ee6891ba3e28bca65c30650ba1a
 [RUNNING]out5,set([]),True
 [SKIPPING]/tmp/tests-number.txt,set([]),False
 [SKIPPING]/tmp/tests-letter.txt,set([]),False
 [RUNNING]out5,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+<<<<<<< HEAD
 [RUNNING]main,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (RemoteNode(index=index,force='0',remote_path='/work/repos/pipedata/test_build/stage1/pipe.py',remote_name='out5')
 ### index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), None)]),True
+=======
+[RUNNING]main,set([(RemoteNode(index=index,force='0',remote_path='/work/repos/pipedata/test_build/stage1/pipe.py',remote_name='out5')
+### index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), None), (MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+>>>>>>> ee4052cff4179ee6891ba3e28bca65c30650ba1a
 ('[result]', RemoteNode(index=index,force='0',remote_path='/work/repos/pipedata/test_build/stage1/pipe.py',remote_name='out5')
 ### index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), RemoteNode(index=index,force='0',remote_path='/work/repos/pipedata/test_build/stage1/pipe.py',remote_name='out5')
 ### index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'))
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
+<<<<<<< HEAD
+=======
+1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
+>>>>>>> ee4052cff4179ee6891ba3e28bca65c30650ba1a
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 1aaaaaaaaaa1aaaa.
 ----------------------------------------------------------------------
@@ -55,6 +91,14 @@ Ran 1 test in 0.101s
 
 OK
 aaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
+1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
+1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
+1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1a.
+----------------------------------------------------------------------
+Ran 1 test in 0.101s
+
+OK
+aaaaaaaaa
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 
