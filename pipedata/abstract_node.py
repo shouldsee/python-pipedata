@@ -1,6 +1,6 @@
 import linecache
 import inspect
-from pipedata._util import cached_property,_dict,_dbgf
+from pipedata._util import cached_property,_dict,_dbgf,frame__default,frame_default
 
 
 class _INIT_VALUE(object):
@@ -11,10 +11,15 @@ class _INIT_VALUE(object):
 returned =  _INIT_VALUE()
 
 class AbstractNode(object):
+    DEBUG_REWRITE = 0
     # ChangedOutputError = ChangedOutputError
     force_index_update = 0 
     tag = None
-    def __init__(self, index, func, input_kw, output_kw, name):
+    # @staticmethod
+    # def frame_default(frame):
+    #     return frame_default(frame)
+    def __init__(self, index, func, input_kw, output_kw, name, ):
+        # frame):
         assert not input_kw,"input_kw should be extracted from the function"
         if name is not None:
             func.__name__ = name
@@ -25,6 +30,13 @@ class AbstractNode(object):
         self._attach_to_root()
         self.runned = 0 
         self.running = 0
+        # self.frame = self.index.frame
+        self.lineno = self.index.frame.f_lineno -1
+        # # # if frame.f_code
+        # self.lineno = frame.f_lineno
+        # self.f_code = frame.f_code
+        # self.f_code = self.index.f_code
+
 
     def __repr__(self):
         return "%s(recordId=%s,index=%r)" % (
@@ -56,6 +68,37 @@ class AbstractNode(object):
     def name(self):
         return self.func.__name__
         pass
+
+    def rewrite(self, index,buffer = None):
+        sourceTree  = index.sourceTree
+
+        # node = index.node_dict[self.recordId]
+        node = self
+        iv = sourceTree[node.lineno].pop()
+        buff = [
+            # '\n\n',
+            '### Autowritten with __repr__',
+            repr(node) if buffer is None else buffer,
+            # '### '+ iv.data.replace('\n',';').strip(),
+            # '\n',
+        ]
+        buff = '\n'.join(buff)+'\n'
+         # + '\n' 
+        # +'\n'
+        # buff = repr(node) +'### __repr__\n' + '#### OLD' + iv.data       
+        sourceTree.discard(iv)
+        sourceTree.addi(iv.begin, iv.end, buff)
+        if self.DEBUG_REWRITE:
+            print("[REWRITING]",self.lineno,self.name, index)
+            for x in sorted(sourceTree): print(x)       
+            print('-'*50)
+            print('[BEFORE]')
+            print(iv.data)
+            print('[AFTER]')
+            print(sourceTree[iv.begin].pop().data)
+            print('-'*50)
+        return 
+
 
     @property
     def func(self,):
@@ -166,6 +209,14 @@ class AbstractNode(object):
         return self
 
 
+    def get_upstream_nodes(self,level=0):
+        if not self.input_kw:
+            res = None
+        else:
+            res = _dict([(x,x.get_upstream_nodes(level+1)) for x in self.input_kw.values()])
+        if not level:
+            res = _dict({self:res})
+        return res
 
     ###### initialisation of graph
     def _init_func(self, d=None, skip =1):
@@ -218,7 +269,7 @@ class AbstractNode(object):
 
         # self._root = self.indexFile._symbolicRootNode
         # self._root = _root = frame.f_locals['_symbolicRootNode']
-        self.index.node_dict[self.name] = self
+        self.index.node_dict[self.recordId] = self
         # self._root.input_kw[ self.name ] = self
     class ChangedError(Exception):
         pass

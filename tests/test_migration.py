@@ -48,7 +48,7 @@ class MigrationCase(unittest.TestCase):
                 # f.write(
                     r'''
 del index.node_dict['out5']
-del index.node_dict["tests_out5_txt"]
+del index.node_dict["tests-out5.txt"]
 @MasterNode.from_func(index,
     {
     "OUT": SlaveFile(index,"tests-out5.txt"),
@@ -83,8 +83,8 @@ if __name__ == '__main__':
         #     # assert 0, d2.realpath()
         #     fn = _writeFunc(stage2_func, d2/'../stage2/pipe.py')
             base._shell('''
-echo 1024> tests-number.txt
-echo b> tests-letter.txt
+echo 1024> /tmp/tests-number.txt
+echo b> /tmp/tests-letter.txt
     ''')    
             fn = stage2/'pipe.py'
             index = base.PipeRunner(fn,fn).pipe.index

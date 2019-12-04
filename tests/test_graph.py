@@ -12,8 +12,8 @@ class GraphCase(unittest.TestCase):
 
         with (base.test_init()).makedirs_p() as d2:
             base._shell('''
-echo 1024> tests-number.txt
-echo b> tests-letter.txt
+echo 1024> /tmp/tests-number.txt
+echo b> /tmp/tests-letter.txt
     ''')
             # index=  base.PipeRunner('pipe','pipe.py')()
             index = base.PipeRunner('pipe','pipe.py').pipe.index
