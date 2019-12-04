@@ -105,8 +105,8 @@ class SharedCases(object):
         # dirname = se
         with path.Path(dirname) as d:
             print ( self._shell('''
-    echo "1"> tests-number.txt; 
-    echo a>tests-letter.txt; 
+    echo "1"> /tmp/tests-number.txt; 
+    echo  a >  /tmp/tests-letter.txt; 
             '''.format(**locals()))    )
 #             import pipe
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
@@ -227,7 +227,7 @@ return
             with open("pipe.py",'a+') as f:
                 f.write(r'''
 del index.node_dict["out10"]
-del index.node_dict["tests_out10_txt"]
+del index.node_dict["tests-out10.txt"]
 @MasterNode.from_func(index,{{
     "OUT":SlaveFile(index,"tests-out10.txt"),
 }})
@@ -275,8 +275,8 @@ SlaveFile(index,"dangling_slave.txt")
         dirname = self.test_init()
         with path.Path(dirname) as d:
             print (self._shell('''
-    echo "1"> tests-number.txt; 
-    echo a>tests-letter.txt; 
+    echo "1"> /tmp/tests-number.txt; 
+    echo a> /tmp/tests-letter.txt; 
             '''.format(**locals()))  )
 #             import pipe
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
@@ -322,6 +322,8 @@ touch tests-letter.txt
 
         # __file__ = 'test_temp.py'
         # frame_init()
+        with open('__temp.py','w') as f:
+            pass
         index = IndexNode('__temp.py.index')
         out5 = SelfSlaveFile(index,"a1.txt",)._master
         File1 = SelfSlaveFile(index,"b1.txt",)._master

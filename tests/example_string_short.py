@@ -6,8 +6,8 @@ import os
 index = IndexNode()
 # print ("[indexFile]",index)
 
-_f1 = SelfSlaveFile( index, 'tests-number.txt',name='numberFile')
-_f2 = SelfSlaveFile( index, 'tests-letter.txt',name='letterFile')
+_f1 = SelfSlaveFile( index, '/tmp/tests-number.txt',name='numberFile')
+_f2 = SelfSlaveFile( index, '/tmp/tests-letter.txt',name='letterFile')
 
 @MasterNode.from_func(index,
     {

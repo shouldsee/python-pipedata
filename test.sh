@@ -4,6 +4,7 @@ python $PWD/tests/test_all.py "$@"
 
 #pip2 install . --user
 #find . -name "*.index" -delete
+bash test_interaction.sh
 exit 0
 
 python2 $PWD/tests/test_all.py 

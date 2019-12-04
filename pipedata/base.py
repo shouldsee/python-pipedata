@@ -20,10 +20,13 @@ from path import Path
 import shutil
 # from _inspect_patch import inspect
 
+import pipedata._ast_util as _ast_util
 from pipedata._ast_util import ast_proj
-from pipedata._util import cached_property
+from pipedata._util import cached_property,frame__default
 from pipedata._util import  _get_upstream_tree, _tree_as_string,_get_upstream_graph,_get_root_nodes
+from pipedata._util import  dict_flatten
 from attrdict import AttrDict
+import intervaltree,ast
 
 try:
     from IPython.lib.pretty import pretty
@@ -63,15 +66,6 @@ class Dumper(object):
 dumper = Dumper
 
 
-def frame__default(frame=None):
-    '''
-    return the calling frame unless specified
-    '''
-    if frame is None:
-        frame = inspect.currentframe().f_back.f_back ####parent of caller by default
-    else:
-        pass    
-    return frame
     
     
 def _open(*a):
@@ -112,8 +106,27 @@ Value is already specified in [TBI]
     class DuplicatedKeyError(Exception):
         pass
 
+class SourceTreeMethods(object):
+    @staticmethod
+    def source_to_itree(buff):
+        d = intervaltree.IntervalTree()
+    # def source_iter(buff):
+        exprs = ast.parse(buff).body
+        lines = buff.splitlines(1)
+        linenos = [x.lineno-1 for x in exprs] + [len(lines)]
+        linenos = zip(linenos[:-1],linenos[1:])
+        for expr,(s,e) in zip(exprs,linenos):
+            # e = e-1
+            # s = s
+            # d[s:e] = (expr,''.join(lines[s:e]))
+            d[s:e] = buff =  ''.join(lines[s:e])
+            # iv = d[s].pop()
+            # print(iv.begin,iv.end,s,e)
+            # print('[BUFF]',s,e,expr)
+            # print(buff)
+        return d
 
-class IndexNode(object):
+class IndexNode(SourceTreeMethods,object,):
     # def DEBUG_INEDX_FLUSH(self):
     DEBUG_INDEX_FLUSH_QUEUE = 0
     @property 
@@ -141,12 +154,32 @@ class IndexNode(object):
         self.path = Path(path).realpath()
         self._node_dict = NodeDict()
         self._node_dict.index = self
-         # _dict()
         self.update_queue = _dict()
+        self.rootNodes = set()
+        self.frame = frame
+        self.lineno = frame.f_lineno - 1
+        assert self.script_path.exists(),(self.script_path,)
+        self.sourceTree = self.source_to_itree(open(self.script_path,'r').read())
+        # expr = ast.parse(self.sourceTree[self.f_lineno].pop().data).body[0]
+        # if isinstance(expr,ast.assign):
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["frame"]
+        return state
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.frame = None
 
     def realpath(self):
         return self.path
-
+    def write_sourceTree(self,fn):
+        with open(fn, 'w') as f:
+            for x in sorted( self.sourceTree):
+                f.write(x.data)
+        (fn + 'c').unlink_p()
+        # path.Path(fn.replace())
+        # os.path.unlink_p()
 
     def index_file_update(self, key, value):
         self.update_queue[key] = value
@@ -186,6 +219,15 @@ class IndexNode(object):
     def get_record(self,key,default):
         return self.records_cached.get(key,default)
 
+    @property
+    def script_path(self):
+        fn = self.path.replace('.index','')
+        fn = fn.replace('.pyc','.py')
+        fn = Path(fn)
+        # assert fn.exists(),(fn,)
+        assert fn.endswith('.py'),(fn,)
+        return fn
+
     def make_copy(self, dest, name = None):
 
         if dest is None:
@@ -197,10 +239,8 @@ class IndexNode(object):
         # dest.makedirs_p()
         assert dest.makedirs_p().isdir(),(dest,)
 
-        fn = self.path.replace('.index','')
-        fn = fn.replace('.pyc','.py')
-        fn = Path(fn)
-        # assert fn.endswith('.py'),fn
+
+        fn = self.script_path
         if name is None:
             name = fn.basename()
         assert name.endswith('.py') and fn.endswith('.py'),(fn,name)
@@ -210,11 +250,34 @@ class IndexNode(object):
         _dest.unlink_p()
         return dest
 
+    def set_rootNodes(self,vals=None):
+        vals = vals or []
+        for val in vals:
+            if val in self.node_dict:
+                self.rootNodes.add((self, self.node_dict[val]))
+            else:
+                assert 0, "did not find node with recordId %r"%val
+        if not vals:
+            try:
+                self.rootNodes.update(_get_root_nodes(self, exclude=set([self])))
+            except Exception as e:
+                print(e)
+                self.rootNodes.add((self.index, self))
+        assert self.rootNodes,('Should not be empty',self.rootNodes)
+        return self.rootNodes
+
     def main(index):
         print('START' + 20*"-")
         print('[INDEX]%s'%index)
         argv = sys.argv
         verbose = '--verbose' in argv 
+
+        val = []
+        if '--roots' in argv:
+            val = argv[argv.index('--roots')+1]
+            val = val.split(',')
+        index.set_rootNodes(val)
+
         if '--changed' in argv:
             del argv[argv.index('--changed')]
             for k,v in index.node_dict.items():
@@ -252,10 +315,86 @@ class IndexNode(object):
                          )))                        
         elif '--tree' in argv:
             # rootNodes = sum(list(_get_root_nodes(x)) for x in index.input_kw.values(),[])
-            rootNodes = _get_root_nodes(index,exclude=set([index]))
-            # print( rootNodes)
-            # print(dumper._dumps(_get_upstream_tree(index,)))
-            print(_tree_as_string(_get_upstream_tree([x[1] for x in rootNodes],)))
+            # rootNodes = _get_root_nodes(index,exclude=set([index]))
+            print(_tree_as_string(_get_upstream_tree([x[1] for x in index.rootNodes],)))
+        elif '--copy-source' in argv:
+            '''
+            Scenarios:
+                - 1. testing a pipeline
+            '''
+            dest = argv[argv.index('--copy-source')+1]
+            dest = Path(dest).realpath()
+            dest.makedirs_p()
+            assert dest.isdir(),(dest,)
+            assert not dest.listdir(),"Destination not empty:%r"%dest
+
+            nodes_to_copy = d = _dict()
+            for x in index.rootNodes:
+                d.update(x[1].get_upstream_nodes(0))
+            nodes_to_copy = dict_flatten(nodes_to_copy,idFunc=lambda x:x.recordId,)
+            s = set()
+            [s.update(v.level_stream) for v in nodes_to_copy.values() if v is not None]
+            nodes_to_copy = s
+            indexes_to_copy = set(v.index for v in nodes_to_copy)
+            # for node in set(index.node_dict.values()) & nodes_to_copy:
+            for node in nodes_to_copy:
+                print(node.__class__,node.recordId, node.lineno)
+            # assert 0
+            # for node in 
+
+            from pipedata.types import SelfSlaveFile,RemoteNode
+            import imp
+            def _copy(src,dest):
+                assert os.path.exists(src),(src,)
+                if not os_stat_safe(src)==os_stat_safe(dest):
+                    dest.dirname().makedirs_p()
+                    shutil.copy2(src,dest)
+                    return 1
+                else:
+                    return 0
+            _move = shutil.move            
+
+            indexMap = _dict()
+            oldIndexPathMap = _dict()
+
+            for i,index in enumerate(indexes_to_copy):
+                _ddir = dest / ("stage%03d"%i)
+                _dscript = _ddir/'pipe.py'
+
+                print(_copy( index.script_path,  _dscript),'[COPY]')
+                newIndex = imp.load_source(_dscript,_dscript).index
+                indexMap[index] = newIndex
+                oldIndexPathMap[index.script_path] = index 
+            # for k,v in indexMap.items():
+            #     print k,v
+
+            for node in nodes_to_copy:
+                newIndex = indexMap[node.index]
+                oldIndex = node.index
+                if isinstance(node, SelfSlaveFile):
+                    _src = node.path
+                    node.index = newIndex
+                    if node.relpath.isabs():
+                        node.relpath = node.relpath.replace(os.sep,'_')
+                    _dest = newIndex.path.dirname() / node.relpath
+                    _copy( _src, _dest )
+                    _buffer = '''{node.__class__.__name__}(index=index,path="{node.relpath}",name="{node._master.name}")'''.format(**locals())
+                    node.rewrite(newIndex, _buffer)
+
+                if isinstance(node, RemoteNode):
+                    node.index = newIndex
+                    node.remote_path = indexMap[oldIndexPathMap[node.remote_path]].script_path
+                    node.rewrite(newIndex)
+
+            for newIndex in indexMap.values():
+                newIndex.write_sourceTree(newIndex.script_path)
+
+
+            for (dp,dn,fns) in os.walk(dest):
+                for fn in fns:
+                    print((dp/fn),(dp/fn).exists())
+
+            # assert 0,(nodes_to_copy,)
         elif '--graph' in argv:
             print(dumper._dumps(map(repr,_get_upstream_graph(index))))
             # return

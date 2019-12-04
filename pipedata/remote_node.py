@@ -10,18 +10,24 @@ class RemoteNode(MasterNode):
     class RemoteModuleMissing(Exception):
         pass
     def __repr__(self,):
-        return '%s(index=%r, name=%r,force=%r,)'%(self.__class__.__name__,
-            self.index,self.name, self.force, )
+        s = ','.join('%s=%r'%(k,str(v)) for k,v in vars(self).items() if k in ['remote_path','remote_name',
+            'name','force'])
+        s = '%s(index=index,%s)\n### index=%r'%(self.__class__.__name__,s,self.index)
+        # s = '%s(%s) ### index=%r' % (s,self.index)
+        return s
+        # return '%s(index=%r, remote_path, remote_name=,name=name=%r,force=%r,)'%(self.__class__.__name__,
+        #     self.index,self.name, self.force, )
     def __call__(self):
         return self.called_value
     def __getitem__(self,k):
         return self.output_kw[k]
+
     def __init__(self, index, remote_path, remote_name, name = None, frame=None,force=0 ):
         assert remote_path.endswith(".py")
         self.remote_name = remote_name
         self.remote_path = (index.realpath().dirname() / remote_path).realpath()
         # .realpath()
-        self.force =force
+        self.force = int(force)
         frame = frame__default(frame)
 
         index = index

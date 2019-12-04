@@ -3,3 +3,5 @@ filelock
 decorator
 path.py
 attrdict
+asciitree
+intervaltree

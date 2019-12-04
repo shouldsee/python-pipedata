@@ -17,9 +17,10 @@ class MasterNode(AbstractNode):
     def __getitem__(self,key):
         return self.output_kw[key]
 
-    def __init__(self, index, func, input_kw, output_kw,  name, force, ):
+    def __init__(self, index, func, input_kw, output_kw,  name, force, frame=None):
         self.force= force
-        super( MasterNode, self).__init__( index, func, input_kw, output_kw, name)
+        super( MasterNode, self).__init__( index, func, input_kw, output_kw, name, )
+        # self.frame_default(frame))
 
     @classmethod
     def from_func(cls, index, output_kw = {}, force=0,name = None ):
@@ -120,7 +121,12 @@ class MasterNode(AbstractNode):
 
         # changed_input = 0
         if self.DEBUG_CHANGE_TUPLE:
-            print("[CHANGED_TUPLE](%d,%d,%d,%d),%s"%(changed_self,changed_input,changed_output,changed_noindex,self.recordId))
+            print("[CHANGED_TUPLE](%d,%d,%d,%d),%s,%s"%(
+                changed_self,changed_input,changed_output,changed_noindex,self.recordId,
+                # self.__class__,
+                self.index.__hash__()
+                )
+            )
         return (changed_self,changed_input,changed_output,changed_noindex)
 
     @cached_property
@@ -138,19 +144,28 @@ class MasterNode(AbstractNode):
     def as_snapshot(self):
         return _dict([
         ('class', self.__class__.__name__),
+        # ('recordId',self.recordId),
         ('self',_dict([('ast_tree',  ast_proj(self.get_source()) )])),
-        ('meta',_dict( [('sourcelines',  self.get_source().splitlines())]) ),
-        ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
+        ('meta',_dict( [
+            ('sourcelines',  self.get_source().splitlines()),
+            # ('output_alias_dict',_dict([(v.recordId,k) for k,v in self.output_kw.items()]))
+            ]) ),
+        ('output_snapshot', _dict( [ ( k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
         return self.as_record()
     def as_record(self,):
         # d = self.as_snapshot()
         return _dict([
         ('class', self.__class__.__name__),
+        # ('recordId',self.recordId),
         ('self',_dict([('ast_tree',  ast_proj(self.get_source()) )])),
-        ('meta',_dict( [('sourcelines',  self.get_source().splitlines())]) ),
+        ('meta',_dict( [
+            ('sourcelines',  self.get_source().splitlines()),
+            # ('output_alias_dict',_dict([(v.recordId,k) for k,v in self.output_kw.items()]))
+            ]) ),
         ('input_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.input_kw.items() ])),
         ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
+        # ('output_snapshot', _dict( [ (k, v.as_snapshot()) for k,v in self.output_kw.items() ])),
         ])
 
 
@@ -203,17 +218,38 @@ class SlaveNode(AbstractNode):
         assert 0, "must be informative"
         return 
 
+    def _index_update(self):
+        ' Slave is contained in the MasterNode.as_data()["output_snapshots"]'
+        pass
+
+    # def _attach_to_root(self):
+    #     '''
+    #     Usually one would not need to directly get slave from node dict, 
+    #     but from the MasterNode.output_kw instead
+    #     '''
+    #     self.index.node_dict["_SLAVE_" +self.recordId] = self
+
 
 class SlaveFile(SlaveNode):
+    def __repr__(self,):
+        s = ','.join('%s="%s"'%(k, (getattr(self,k))) 
+            for k in ['path', 'name',])
+        s = '%s(index=index,%s)\n### index=%r'%(self.__class__.__name__,s,self.index)
+        return s
 
-    def __init__(self, index,  path,):
+    def __init__(self, index,  path, name = None, frame=None):
         func = lambda:None
         input_kw = {}
         output_kw = {}
-        name = re.sub('[^a-zA-Z0-9_]','_',path)
+        if name is None:
+            name = re.sub('[^a-zA-Z0-9_]','_',path)
         # super( self.__class__, self).__init__(index, func,  input_kw, output_kw, name, )
-        super( SlaveFile, self).__init__(index, func,  input_kw, output_kw, name, )
+        # super( SlaveFile, self).__init__(index, func,  input_kw, output_kw, name, self.frame_default(frame) )
         self.relpath=Path(path )
+        super( SlaveFile, self).__init__(index, func,  input_kw, output_kw, name, )
+        if self.__class__ == SlaveFile:
+            assert self.realpath().startswith(self.index.path.dirname()),"Slave file must be in project directory"
+        # assert not self.relpath.startswith('/'),
 
     @property
     def path(self):
@@ -225,19 +261,30 @@ class SlaveFile(SlaveNode):
     @property
     def recordId(self):
         return self.relpath
+        
+    @property
+    def name(self):
+        return self.relpath
 
     def as_record(self, ):
         # stat_result =os.stat(self.realpath())
         stat_result =os_stat_safe(self.realpath())
         # print ("[UPDATING_INDEX]%s\n%s"%(self,stat_result.st_mtime,))
-        return dumper._loads( dumper._dumps( dict(stat_result = stat_result)))
+        return dumper._loads( dumper._dumps( dict(recordId=self.recordId, stat_result = stat_result)))
+
 
 
 class AutoMasterNode(MasterNode):
+    _slave = None
+    def __init__(self, index, func, input_kw, output_kw, name, force,slave,  ):
+        self._slave = slave
+        super(AutoMasterNode,self).__init__(index, func, input_kw, output_kw, name, force, )
+        return     
     # ChangedOutputError = 
     # class ChangedSelfError(MasterNoed.ChangedError):
     #     pass
     # ChangedOutputError = ChangedSelfError
+    _slave = None
     def _hook_changed_output(self,recOld,recNew):
         # for k in recOld['output_snapshot']:
         #     v1 = recOld['output_snapshot'][k]
@@ -248,8 +295,14 @@ class AutoMasterNode(MasterNode):
 
     def _get_called_value(self,*a,**kw):
         super(AutoMasterNode,self)._get_called_value()
-        return self.output_kw['_SLAVE']
-    pass
+        # return self.output_kw[self._slave.recordId]
+        return self.output_kw["_SLAVE"]
+        # '_SLAVE']
+    # def _
+    # pass
+    @property
+    def recordId(self):
+        return self._slave.recordId
 
 
 class SelfSlaveFile(SlaveFile):
@@ -261,20 +314,21 @@ class SelfSlaveFile(SlaveFile):
     @staticmethod
     def _hook_changed_output(self,recOld,recNew):
         print("[FILE_UPDATED] %s"%self)
-    
     def __init__(self, index, path, name = None):
         # super(self.__class__, self).__init__(index,path)
         super(SelfSlaveFile, self).__init__(index,path)
         func = lambda: self
         input_kw = {}
         output_kw = {'_SLAVE': self}
+        # output_kw = {self.recordId: self}
         if name is None:
             name = '_AutoMasterNode_' + self.name 
-        # assert 0,name
         force=0
         # class _AutoMasterNode(AutoMasterNode):
-        self._master = AutoMasterNode(index, func, input_kw, output_kw, name, force, )
+        self._master = AutoMasterNode(index, func, input_kw, output_kw, name, force, self)
         self._master._hook_changed_output = self._hook_changed_output
+        self._master._slave = self
+
 
 
 InputFile = SelfSlaveFile

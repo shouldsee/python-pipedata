@@ -6,7 +6,7 @@ import os,glob,sys
 os.chdir(os.path.dirname(__file__))
 setup(
 	name='pipedata',
-	version='0.0.3',
+	version='0.0.4',
         packages=['pipedata',],
 	include_package_data=True,
 	license='MIT',

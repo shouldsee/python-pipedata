@@ -26,8 +26,8 @@ class SharedObject(_SharedObject):
     def _(self):
         with path.Path(dirname) as d:
             print ( self._shell('''
-echo "1"> tests-number.txt; 
-echo a>tests-letter.txt; 
+echo "1"> /tmp/tests-number.txt; 
+echo a>   /tmp/tests-letter.txt; 
             '''.format(**locals()))    )
 #             import pipe
 #             pipe= imp.load_source( 'pipe', 'pipe.py')
@@ -86,7 +86,7 @@ rm tests-out5.txt
             with base.realpath() as d1:
                 with (base.test_init()).makedirs_p() as d2:
                     base._shell('''
-        echo 1024> tests-number.txt
+        echo 1024> /tmp/tests-number.txt
         ''')
             assert os.getcwdu() == d.realpath(), (os.getcwdu(), )                    
             # assert os.getcwdu() == d.realpath(), (os.getcwdu(), )

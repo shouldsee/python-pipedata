@@ -1,6 +1,7 @@
 from collections import OrderedDict as _dict
 import subprocess
 
+import inspect
 
 import asciitree
 from asciitree.drawing import BOX_DOUBLE
@@ -16,6 +17,20 @@ def _dbgfs():
     import pdb,traceback
     pdb.set_trace()    
 
+def dict_flatten(d,k0='',sep='.',idFunc = lambda x:x,out=None):
+    if out is None:
+        out= []
+    for _k,v in d.iteritems():
+        k = idFunc(_k)
+        k = sep.join((k0,k))
+        out.append((k+'_KEY', _k))
+        if isinstance(v,dict) and len(v):
+            dict_flatten(v,k,sep, idFunc, out)
+        else:
+            out.append((k,v))
+
+    return _dict(out)
+
 
 def _tree_as_string(d):
     if len(d)!=1:
@@ -25,7 +40,7 @@ def _tree_as_string(d):
 
 
 def _get_upstream_tree(lst):
-    fmt = lambda x:"%s:%s"%(x.__class__.__name__,x.recordId)
+    fmt = lambda x:"%s:%s"%(x.__class__.__name__,x.recordId,)
     d = _dict([(fmt(x), 
         _get_upstream_tree(x.input_kw.values())) for x in lst])
     return d
@@ -114,3 +129,14 @@ def _shell(cmd,debug=0,silent=0,
         return suc,res
     else:
         return res
+
+def frame_default(frame=None):
+    '''
+    return the calling frame unless specified
+    '''
+    if frame is None:
+        frame = inspect.currentframe().f_back.f_back ####parent of caller by default
+    else:
+        pass    
+    return frame
+frame__default = frame_default
