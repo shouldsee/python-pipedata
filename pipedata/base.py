@@ -22,6 +22,7 @@ import shutil
 
 from pipedata._ast_util import ast_proj
 from pipedata._util import cached_property
+from pipedata._util import  _get_upstream_tree, _tree_as_string,_get_upstream_graph,_get_root_nodes
 from attrdict import AttrDict
 
 try:
@@ -118,7 +119,19 @@ class IndexNode(object):
     @property 
     def node_dict(self):
         return self._node_dict
+    @property 
+    def index(self):
+        return self
         # return self._root.input_kw
+    @property 
+    def input_kw(self):
+        return self._node_dict
+
+    @property 
+    def recordId(self):
+        return "_ROOT"
+        # self._node_dict
+    
     def __repr__(self):
         return "%s(path=%r)"%(self.__class__.__name__, str(self.path))
     def __init__(self,path = None, frame=None):
@@ -134,6 +147,7 @@ class IndexNode(object):
     def realpath(self):
         return self.path
 
+
     def index_file_update(self, key, value):
         self.update_queue[key] = value
         return (key,value)
@@ -141,7 +155,7 @@ class IndexNode(object):
     def index_file_flush(self, ):
         # assert self.sync
         ### flush all index
-            
+
         [ [remote_index.index_file_flush(),
             sys.stdout.write('[REMOTE_INDEX_FLUSH]%s\n'%remote_index)] 
             for remote_index in self.remote_index_set]
@@ -198,6 +212,7 @@ class IndexNode(object):
 
     def main(index):
         print('START' + 20*"-")
+        print('[INDEX]%s'%index)
         argv = sys.argv
         verbose = '--verbose' in argv 
         if '--changed' in argv:
@@ -212,6 +227,8 @@ class IndexNode(object):
                     print('\t'.join(("[CHANGED=%s]"%changed, k, v.__class__.__name__, )))
                 # print("[CHANGED=%d]"%v.changed_safe(),k,v, )
         elif '--changed-upstream' in argv:
+            for node,status in index.remote_node_status_set:
+                 print("%s,%s"%(status,node))                 
             for k,v in index.node_dict.items():
                 changed_upstream = v.changed_upstream_safe
                 # err = None
@@ -225,7 +242,7 @@ class IndexNode(object):
                          v.__class__.__name__,  
                          v.index.realpath(), )))
                 else:
-                    changed_upstream = [x.recordId for x,e in changed_upstream]
+                    changed_upstream = [x.recordId for x,e in changed_upstream][::-1]
                     print('\t'.join((
                         "[CHANGED_UPSTREAM=%s]"%(int(bool(changed_upstream))),
                          k,
@@ -233,14 +250,37 @@ class IndexNode(object):
                          v.__class__.__name__,  
                          # v.index.realpath(), 
                          )))                        
-            return
+        elif '--tree' in argv:
+            # rootNodes = sum(list(_get_root_nodes(x)) for x in index.input_kw.values(),[])
+            rootNodes = _get_root_nodes(index,exclude=set([index]))
+            # print( rootNodes)
+            # print(dumper._dumps(_get_upstream_tree(index,)))
+            print(_tree_as_string(_get_upstream_tree([x[1] for x in rootNodes],)))
+        elif '--graph' in argv:
+            print(dumper._dumps(map(repr,_get_upstream_graph(index))))
+            # return
         else:
             index.sync()
         print('END' + 20*"-")
 
     @property
-    def remote_index_set(index):
-        return  set( x.remote_node.index for x in index.node_dict.values() if hasattr(x,'remote_node'))
+    def remote_node_status_set(index):
+        s = set()
+        for x in index.node_dict.values():
+            if getattr(x,'remote_connected',None) is not None:
+                s.add((x,x.remote_connected))
+        return s
+    @property
+    def remote_index_set(self):
+        s = set()
+        for node,status in self.remote_node_status_set:
+            if status:
+                s.add( node.remote_node.index)
+
+        return s
+
+
+        # return  set( x.remote_index_safe for x in index.node_dict.values() if hasattr(x,'remote_node'))
         
     def sync(self):
         with self.realpath().dirname():

@@ -94,8 +94,15 @@ class AbstractNode(object):
 
     @property
     def changed(self):
-        self.initialised_tuples ## lookup upsteram and downstream
-        return any([ x._changed for x in self.level_stream])
+        assert 0,"TBI"
+    @cached_property
+    def changed_upstream( self,):
+        assert 0,"TBI"
+
+    @cached_property
+    def changed_upstream_safe( self,):
+        assert 0,"TBI"
+
 
     @property
     def changed_safe(self):
@@ -108,17 +115,9 @@ class AbstractNode(object):
         # finally:
         return changed,e
 
-    @cached_property
-    def changed_upstream( self,):
-        self.input_kw
-        return [x for x in self.input_kw.values() if any([ x.changed_upstream, x.changed])]
 
-    @cached_property
-    def changed_upstream_safe( self,):
-        self.input_kw
-        return [(x,x.changed_safe[1]) for x in self.input_kw.values() 
-            if any([ x.changed_upstream_safe, x.changed_safe[0]])]
-
+    def get_upstream_tree(self):
+        return "END"
 
     @cached_property
     def called_value(self,*a,**kw):

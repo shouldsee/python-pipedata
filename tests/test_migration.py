@@ -22,6 +22,7 @@ def _writeFunc(func, fn,RINT=RINT):
         # assert 0,(fn,)
         # .realpath()
         f.write(s)
+        (fn + '.index').unlink_p()
         return fn
 
 class MigrationCase(unittest.TestCase):
@@ -107,8 +108,8 @@ echo b> tests-letter.txt
                 index.node_dict['main']().returned
                 )
                 # .returned)
-            index = base.PipeRunner( fn,fn ).pipe.index
-            index.sync()
+            # index = base.PipeRunner( fn,fn ).pipe.index
+            # index.sync()
         pass
 
 

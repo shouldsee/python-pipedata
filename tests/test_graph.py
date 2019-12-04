@@ -17,6 +17,7 @@ echo b> tests-letter.txt
     ''')
             # index=  base.PipeRunner('pipe','pipe.py')()
             index = base.PipeRunner('pipe','pipe.py').pipe.index
+            # index.sync()
             index.node_dict['make_combined']()
             index.index_file_flush()
             exp = '''

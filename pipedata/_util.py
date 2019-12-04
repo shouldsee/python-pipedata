@@ -1,6 +1,10 @@
 from collections import OrderedDict as _dict
 import subprocess
 
+
+import asciitree
+from asciitree.drawing import BOX_DOUBLE
+
 def _dbgf():        
     import pdb,traceback
     print(traceback.format_exc())
@@ -11,6 +15,42 @@ def _dbgf():
 def _dbgfs():        
     import pdb,traceback
     pdb.set_trace()    
+
+
+def _tree_as_string(d):
+    if len(d)!=1:
+        d=dict(ROOT=d)
+    box_tr = asciitree.LeftAligned(draw=asciitree.BoxStyle(gfx=BOX_DOUBLE, horiz_len=1))(d)
+    return box_tr
+
+
+def _get_upstream_tree(lst):
+    fmt = lambda x:"%s:%s"%(x.__class__.__name__,x.recordId)
+    d = _dict([(fmt(x), 
+        _get_upstream_tree(x.input_kw.values())) for x in lst])
+    return d
+
+_ID = lambda x:(x.index,x)
+def _get_root_nodes(self,exclude=None):
+    if exclude is None:
+        exclude = set()
+    exclude = set(_ID(x) for x in exclude)
+    
+    it = _get_upstream_graph(self,)
+    it = [x for x in it if x[0] not in exclude]
+    rootNodes, leafNodes = zip(*it)
+    # return 
+
+    # print set(rootNodes),set(leafNodes)
+    return set(rootNodes)  - set(leafNodes) 
+
+def _get_upstream_graph(self, edgelist=None):
+    if edgelist is None:
+        edgelist = []
+    for x in self.input_kw.values():
+        edgelist.append(( _ID(self),  _ID(x)))
+        _get_upstream_graph(x, edgelist)
+    return edgelist
 
 
 class cached_property(object):

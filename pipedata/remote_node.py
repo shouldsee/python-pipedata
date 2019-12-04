@@ -7,6 +7,8 @@ import imp
 # class RemoteNode(AbstractNode):
 class RemoteNode(MasterNode):
     VERBOSE = 0
+    class RemoteModuleMissing(Exception):
+        pass
     def __repr__(self,):
         return '%s(index=%r, name=%r,force=%r,)'%(self.__class__.__name__,
             self.index,self.name, self.force, )
@@ -34,6 +36,7 @@ class RemoteNode(MasterNode):
         _ = '''
         ### should modify remote leaves records to include self
         '''
+        # with self.remote_path.dirname():
         self._output_kw = self.remote_node()._output_kw
         # remote_node()
         if remote_node.runned:
@@ -47,8 +50,22 @@ class RemoteNode(MasterNode):
         output_kw = _dict()
         return (input_kw, output_kw)
 
+    @property
+    def remote_connected(self):
+        return self.remote_path.exists()
+
+        # try:
+        #     return self.remote_node.index
+        # except self.RemoteModuleMissing as e:
+        #     return e
+        # finally:
+        #     return None
+
+
     @cached_property
     def remote_node(self):
+        if not self.remote_path.exists():
+            raise self.RemoteModuleMissing(self.remote_path)
         import warnings
         # warnings.filterwarnings("ignore", message=".*not found while handling absolute import.*")
         warnings.filterwarnings("ignore", module = self.remote_path)
@@ -69,9 +86,17 @@ class RemoteNode(MasterNode):
                 ("remote_record",self.remote_node.as_snapshot()),
                 ])
         rec['output_snapshot'] = []
-
         return rec
-
+    def as_snapshot(self):
+        rec = super(RemoteNode,self).as_snapshot()
+        rec['self'].update(
+                [
+                ("remote_path" , self.remote_path),
+                ("remote_name" , self.remote_name),
+                ("remote_record",self.remote_node.as_snapshot()),
+                ])
+        rec['output_snapshot'] = []
+        return rec
     # @property
     # def remote_index_file(self):
     #     return self.remote_path + ".index"        

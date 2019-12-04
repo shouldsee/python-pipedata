@@ -12,49 +12,43 @@
   from pipedata.types import RemoteNode
 .
 ----------------------------------------------------------------------
-Ran 1 test in 0.096s
+Ran 1 test in 0.113s
 
 OK
-('[indexFile]', IndexNode(path='/work/repos/pipedata/tests/example_string_short.py.index'))
 
-('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))
 START--------------------
-[CHANGED_TUPLE](1,0,1),numberFile
-[RUNNING]numberFile,[],True
-[CHANGED_TUPLE](1,0,1),letterFile
-[RUNNING]letterFile,[],True
-[CHANGED_TUPLE](1,0,1),out5
-[RUNNING]out5,[AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
+[CHANGED_TUPLE](0,0,0,1),numberFile
+[RUNNING]numberFile,set([]),True
+[CHANGED_TUPLE](0,0,0,1),letterFile
+[RUNNING]letterFile,set([]),True
+[CHANGED_TUPLE](0,0,0,1),out5
+[RUNNING]out5,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
 (<class 'pipedata.master_node.SelfSlaveFile'>, <class 'pipedata.master_node.AutoMasterNode'>)
 ()
-[CHANGED_TUPLE](1,0,1),out10
-[RUNNING]out10,[AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
-[CHANGED_TUPLE](1,0,1),out15
-[RUNNING]out15,[AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
-[CHANGED_TUPLE](1,0,1),make_combined_short
-[RUNNING]make_combined_short,[MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
-[CHANGED_TUPLE](1,0,1),make_combined
-[RUNNING]make_combined,[MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), MasterNode(recordId=out10,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
+[CHANGED_TUPLE](0,0,0,1),out10
+[RUNNING]out10,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[CHANGED_TUPLE](0,0,0,1),out15
+[CHANGED_TUPLE](0,0,0,1),make_combined_short
+[RUNNING]out15,set([(AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[RUNNING]make_combined_short,set([(MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[CHANGED_TUPLE](0,0,0,1),make_combined
+[RUNNING]make_combined,set([(MasterNode(recordId=out10,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=numberFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out15,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (AutoMasterNode(recordId=letterFile,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
 END--------------------
 1a1a1a1a1a
 1a1a1a1a1a1a1a1a1a1a
 1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a
 
-('[indexFile]', IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))
-[CHANGED_TUPLE](0,0,0),numberFile
-[CHANGED_TUPLE](0,0,0),letterFile
-[CHANGED_TUPLE](1,0,0),out5
-[CHANGED_TUPLE](1,0,1),out5
-[RUNNING]out5,[],True
-[SKIPPING]numberFile,[],False
-[SKIPPING]letterFile,[],False
-[RUNNING]out5,[MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index'))],True
-[CHANGED_TUPLE](1,0,1),main
-[RUNNING]main,[RemoteNode(index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), name='out5',force=0,)],True
+[CHANGED_TUPLE](0,0,0,0),numberFile
+[CHANGED_TUPLE](0,0,0,0),letterFile
+[CHANGED_TUPLE](1,0,0,0),out5
+[CHANGED_TUPLE](0,0,0,1),out5
+[CHANGED_TUPLE](0,0,0,1),main
+[RUNNING]out5,set([]),True
+[SKIPPING]numberFile,set([]),False
+[SKIPPING]letterFile,set([]),False
+[RUNNING]out5,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None)]),True
+[RUNNING]main,set([(MasterNode(recordId=out5,index=IndexNode(path='/work/repos/pipedata/test_build/stage1/pipe.py.index')), None), (RemoteNode(index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), name='out5',force=0,), None)]),True
 ('[result]', RemoteNode(index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), name='out5',force=0,), RemoteNode(index=IndexNode(path='/work/repos/pipedata/test_build/stage2/pipe.py.index'), name='out5',force=0,))
-1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
-1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
-1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa
 1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa1aaaaaaaaaa

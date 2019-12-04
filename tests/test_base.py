@@ -41,7 +41,7 @@ class PipeRunner(object):
     def __call__(self,*a,**kw):
         pipe_run(self.pipe.index)
         return self.pipe.index
-                
+
         # import pipedata.base as pipedata
         # imp.reload(pipedata)
 #         reload(pipedata) ### class attributes would otherwise be kept  e.g. InputTrackedFile.counter
@@ -153,8 +153,10 @@ rm tests-out5.txt
         index_diff_error = self.index_diff_error
         pr =  PipeRunner('pipe','pipe.py')
         # pr.pipe.MasterNode._hook_indexed_diff_file = lambda self: _raise(index_diff_error())
-        pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
-            _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
+        if 0:
+            pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
+                _raise(index_diff_error()) if (True,False)==(ccode,cinput) else None)
+
         # pr.pipe.MasterNode._hook_changed_record = lambda s,ccode,cinput:(
         #     _raise(index_diff_error()) if (False,True)==(ccode,cinput) else None)        
         return pr

@@ -6,6 +6,8 @@ from path import Path
 import re
 from pipedata.base import os_stat_safe
 
+
+
 class MasterNode(AbstractNode):
     DEBUG_SOURCE_CHANGE= 0
     DEBUG_CHANGE_TUPLE = 1
@@ -29,25 +31,66 @@ class MasterNode(AbstractNode):
         return _dec        
 
 
-    @property
-    def changed(self):
-        return any(self._changed_tuple)
 
     @staticmethod
     def _hook_changed_output(self,recOld,recNew):
-        # for k in recOld['output_snapshot']:
-        #     v1 = recOld['output_snapshot'][k]
-        #     v2 = recNew['output_snapshot'][k]
-        #     if v1!=v2:
-        #         print(self,k,v1,v2)
         raise self.ChangedOutputError("output for %s has changed since snapshot"%self)
-
 
     def _hook_changed_record(self, changed_self,changed_input):
         return 
 
+    def get_upstream_tree(self):
+        d = _get_upstream_tree(self,)
+        return d
+
+    @property
+    def changed(self):
+        return any(self.changed_tuple)
+
+    @property
+    def changed_safe(self):
+        try:
+            changed = self.changed
+            e = None
+        except self.ChangedError as e:
+            changed = 1
+            # print (e)
+        # finally:
+        return changed,e        
+
+
     @cached_property
-    def _changed_tuple(self):    
+    def changed_upstream( self,):
+        return self.changed_upstream_safe
+        self.input_kw
+        return (
+            [x for x in self.input_kw.values() if any([ x.changed_upstream, x.changed])]
+            + [self] if (self.changed_tuple[0:2])==(0,1) else []
+            )
+
+
+    @cached_property
+    def changed_upstream_safe( self,):
+        self.input_kw
+        # lst = []
+        _set = set()
+        for x in self.input_kw.values():
+            if any([ x.changed_upstream_safe, x.changed_safe[0]]):
+                # if x.changed_upstream:
+                    # lst.append(x.changed_upstream)
+                _set.update(x.changed_upstream_safe)
+                _set.add((x,x.changed_safe[1]))
+                # _set.add((x,None))
+        if (self.changed_tuple_safe[0:2]==(0,1)):
+            # _set.add((self,self.changed_safe))
+            _set.add((self,self.changed_safe[1]))
+            # _set.add((self,self.changed_safe))
+            # lst.append((self,self.changed_safe))
+        return _set
+
+
+    @cached_property
+    def changed_tuple_safe(self):    
         recOld = self.get_record()
         # .copy()
         recNew = self.as_record()
@@ -56,31 +99,40 @@ class MasterNode(AbstractNode):
         if not recOld:
             # print("[CHANGED_INDEX_ABSENT]%s%s"%(self.index,self))
             # self._hook_noindex()
-            changed_self, changed_input, changed_output = 1,1,1
+            changed_self, changed_input, changed_output,changed_noindex = 0,0,0,1
 
         else:
+            changed_noindex = 0
             if recOld != recNew:
                 changed_self = recOld['self'] != recNew['self']
                 changed_input = recOld['input_snapshot'] != recNew['input_snapshot']
                 changed_output = recOld['output_snapshot'] != recNew['output_snapshot']
                 if self.DEBUG_SOURCE_CHANGE and changed_self:    
                     print (dumper._dumps([recOld.get('meta'),recNew.get('meta') ]))
-                if changed_output:
-                    self._hook_changed_output(self, recOld,recNew)
+                # if changed_output:
+                #     self._hook_changed_output(self, recOld,recNew)
                 # print("[CHANGED_DIFF](%s,%s,%s),%s%s"%(changed_self,changed_input,changed_output,self,self.index,))
-                changed_self, changed_input,changed_output
-                self._hook_changed_record(changed_self, changed_input)
+                changed_self, changed_input, changed_output,changed_noindex
+                # self._hook_changed_record(changed_self, changed_input)
             else:
                 # print("[CHANGED_SAME]%s%s"%(self.index,self))
-                changed_self, changed_input, changed_output = 0,0,0
+                changed_self, changed_input, changed_output,changed_noindex = 0,0,0,changed_noindex
 
-        changed_input = 0
+        # changed_input = 0
         if self.DEBUG_CHANGE_TUPLE:
-            print("[CHANGED_TUPLE](%d,%d,%d),%s"%(changed_self,changed_input,changed_output, self.recordId))
-            # self,self.index,))
-        # print(changed)
-        # (changed_self,changed_input,changed_output)
-        return (changed_self,changed_input,changed_output)
+            print("[CHANGED_TUPLE](%d,%d,%d,%d),%s"%(changed_self,changed_input,changed_output,changed_noindex,self.recordId))
+        return (changed_self,changed_input,changed_output,changed_noindex)
+
+    @cached_property
+    def changed_tuple(self,):
+        changed_self, changed_input, changed_output,changed_noindex = self.changed_tuple_safe
+        if changed_output:
+            self._hook_changed_output(self, {},{})
+        if any(self.changed_tuple_safe[:3]):
+            self._hook_changed_record(changed_self, changed_input)
+        return self.changed_tuple_safe
+
+
     def get_source(self):
         return  self._get_func_code(self.func)
     def as_snapshot(self):
@@ -92,6 +144,7 @@ class MasterNode(AbstractNode):
         ])
         return self.as_record()
     def as_record(self,):
+        # d = self.as_snapshot()
         return _dict([
         ('class', self.__class__.__name__),
         ('self',_dict([('ast_tree',  ast_proj(self.get_source()) )])),
@@ -160,14 +213,18 @@ class SlaveFile(SlaveNode):
         name = re.sub('[^a-zA-Z0-9_]','_',path)
         # super( self.__class__, self).__init__(index, func,  input_kw, output_kw, name, )
         super( SlaveFile, self).__init__(index, func,  input_kw, output_kw, name, )
-        self.path=Path(path )
+        self.relpath=Path(path )
 
+    @property
+    def path(self):
+        return self.realpath()
+    
     def realpath(self):
-        return self.index.path.dirname()/self.path
+        return self.index.path.dirname()/self.relpath
 
     @property
     def recordId(self):
-        return self.path
+        return self.relpath
 
     def as_record(self, ):
         # stat_result =os.stat(self.realpath())

@@ -4,7 +4,7 @@ from pipedata.types import MasterNode, SlaveFile, SelfSlaveFile
 import os
 
 index = IndexNode()
-print ("[indexFile]",index)
+# print ("[indexFile]",index)
 
 _f1 = SelfSlaveFile( index, 'tests-number.txt',name='numberFile')
 _f2 = SelfSlaveFile( index, 'tests-letter.txt',name='letterFile')

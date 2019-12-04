@@ -1,9 +1,10 @@
 set -e
 
-# python $PWD/tests/test_all.py "$@"
+python $PWD/tests/test_all.py "$@"
 
 #pip2 install . --user
 #find . -name "*.index" -delete
+exit 0
 
 python2 $PWD/tests/test_all.py 
 python2 $PWD/tests/test_all.py MigrationCase.test_migrate 
